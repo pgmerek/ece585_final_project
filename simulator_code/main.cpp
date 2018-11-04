@@ -10,7 +10,7 @@
 int main(int arg c, char * argv[])
 {
     
-    Do{
+   
         
     /*Scenario 1: Load all of the cache lines of a particular set
      
@@ -38,7 +38,7 @@ int main(int arg c, char * argv[])
                      
         
            
-      While( 
+      
 
 
 */ 

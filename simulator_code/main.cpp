@@ -23,14 +23,17 @@ int main(int arg c, char * argv[])
      While(# lines >=0)
             4.  read indivdual lines and Parce one at a timne
             
-                 -> Call to line function
+                 -> Call to line function (Class encompasses below info)
                         -> call mode function (to read first byte of line)
                            -> convert remainder of array to hex
+                               -> Call Tag function
+                                 -> call index function 
+                                   -> call to the offset
+                         ->  Check Mesi bits
+                                -> Determin hit or miss
                      
         
-                    ->  Call to mode function (is read or write)
-                       ->  Call 
-             
+  
         
      3. 
      

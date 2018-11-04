@@ -29,8 +29,8 @@ class cache
     public:
         cache();
         ~cache();
-        int get_reads() const { return reads} 
-        int get_writes() const { return writes };
+        int get_reads() const { return reads } 
+        int get_writes() const { return writes }
         int hits();
         int misses();
         float hit_miss_ratio();
@@ -66,7 +66,7 @@ class line
         ~line();
         int set_tag(int new_tag);
         int set_lru(int new_lru);
-        int get_mesi(void) const;
+        int get_mesi(char * return_string) const;
         int get_tag(void) const { return tag; }
         int get_lru(void) const { return lru; }
 

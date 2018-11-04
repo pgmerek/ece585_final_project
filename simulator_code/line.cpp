@@ -4,4 +4,55 @@
  * 4 November 2018
  */
 
-#include <header.h>
+#include "header.h"
+
+line::line()
+{
+    tag = -1;
+    lru = -1;
+    next = NULL;
+    prev = NULL;
+    mesi = INVALID;
+}
+
+line::~line()
+{
+    next = NULL;
+    prev = NULL;
+}
+
+line::set_tag(int new_tag)
+{
+    tag = new_tag;
+    return 1;
+}
+
+line::set_lru(int new_lru)
+{
+    lru = new_lru;
+    return 1;
+}
+
+line::get_mesi(char * return_string)
+{
+    switch(mesi)
+    {
+        case MODIFIED:
+            strcpy(return_string, "MODIFIED");
+            break;
+        case INVALID:
+            strcpy(return_string, "INVALID");
+            break;
+        case SHARED:
+            strcpy(return_string, "SHARED");
+            break;
+        case EXCLUSIVE:
+            strcpy(return_string, "EXCLUSIVE");
+            break;
+    }
+
+    if(!return_string)
+            return 0;
+    return 1;
+}
+

@@ -10,17 +10,18 @@
 int main(int arg c, char * argv[])
 {
     
-
+    Do{
+        
     /*Scenario 1: Load all of the cache lines of a particular set
      
-     1.  Make mem space for data 
+     1.  Make mem space for data (8 way assoc and 1MB
      
-     2.  Set up instrcution cache (read vs write)
+     2.  Set up instrcution cache (read vs write  - 4way assos - 1MB)
      
      3. Read in entire set.
         -> call function to get set
      
-     While(# lines >=0)
+     While(!eof)
             4.  read indivdual lines and Parce one at a timne
             
                  -> Call to line function (Class encompasses below info)
@@ -29,26 +30,15 @@ int main(int arg c, char * argv[])
                                -> Call Tag function
                                  -> call index function 
                                    -> call to the offset
-                         ->  Check Mesi bits
-                                -> Determin hit or miss
+                         ->  Check Mesi bits 
+                                -> Determine hit or miss 
+                                    -> check tag matches
+                                      Return (hit or miss) 
+                                    
                      
         
-  
-        
-     3. 
-     
-     
-    
-    1. Get char for operation type
-        
-    2. get hex value one space away on sam line
-3. convert hex value to a binary string
-4. Read char 0-6 to get byte offset
-5. read char 7-20 for index
-6. read chars 21-32 for tag
-7. Load "way" in index
-8. Update LRU
-9. Update MESI
+           
+      While( 
 
 
 */ 

@@ -4,6 +4,9 @@
  * 4 November 2018
  */
 
+#include <cstdio>
+#include <cstring>
+
 #define CPU_BITS 32
 // Instruction cache constants
 #define INSTR_NUM_LINES 4
@@ -13,6 +16,10 @@
 #define DATA_NUM_LINES 8
 #define DATA_NUM_SETS 16384
 #define DATA_BYTE_LINES 64
+// Standard size for character array buffers
+#define BUFFER_SIZE 256
+#define HIT 1
+#define MISS 0
 
 // Declare an enum for the MESI bits
 enum enum_mesi
@@ -46,16 +53,28 @@ class cache
         int set_size;
         int associativity;
         // Pointer to the sets in the cache
-        set ** Sets;
+        set * Sets;
 };
 
 class set
 {
     pubic:
-        set();
+        set(int set_associativity, int set_index, int set_address_bits, int set_index_bits, int set_offset_bits);
         ~set();
+        read(unsigned int tag);
 
     private:
+        line * all_lines;   // All lines in the set
+        line * first_line;
+        line * last_line;
+        int count;
+        unsigned int associativity;
+        unsigned int index;
+        unsigned int address_bits;
+        unsigned int index_bits;
+        unsigned int offset_bits;
+
+
 
 };
 

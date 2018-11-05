@@ -4,7 +4,7 @@
  * 4 November 2018
  */
 
-#include <header.h>
+#include "header.h"
 
 //Arg = mode (0 =summary of staticscs, 1= verbose)
 int main(int arg c, char * argv[])

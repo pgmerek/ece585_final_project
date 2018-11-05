@@ -24,10 +24,10 @@
 // Declare an enum for the MESI bits
 enum enum_mesi
 {
-    MODIFIED    = 0;
-    INVALID     = 1;
-    SHARED      = 2;
-    EXCLUSIVE   = 3;
+    MODIFIED    = 0,
+    INVALID     = 1,
+    SHARED      = 2,
+    EXCLUSIVE   = 3
 };
 
 // Declare the necessary classes
@@ -36,10 +36,10 @@ class cache
     public:
         cache();
         ~cache();
-        int get_reads() const { return reads } 
-        int get_writes() const { return writes }
-        int hits();
-        int misses();
+        int get_reads() const { return reads; } 
+        int get_writes() const { return writes; }
+        int get_hits() const { return hits; }
+        int get_misses();
         float hit_miss_ratio();
 
     private:
@@ -58,15 +58,15 @@ class cache
 
 class set
 {
-    pubic:
+    public:
         set(int set_associativity, int set_index, int set_address_bits, int set_index_bits, int set_offset_bits);
         ~set();
         read(unsigned int tag);
 
     private:
-        line * all_lines;   // All lines in the set
-        line * first_line;
-        line * last_line;
+        tag_array * all_lines;   // All lines in the set
+        tag_array * first_line;
+        tag_array * last_line;
         int count;
         unsigned int associativity;
         unsigned int index;
@@ -78,11 +78,12 @@ class set
 
 };
 
-class line
+// Tag array for each line
+class tag_array
 {
-    pubic:
-        line();
-        ~line();
+    public:
+        tag_array();
+        ~tag_array();
         int set_tag(int new_tag);
         int set_lru(int new_lru);
         int get_mesi(char * return_string) const;
@@ -94,7 +95,8 @@ class line
         int lru;
         enum_mesi mesi;
         // Pointers to the next and previous lines relative to this line
-        line * next;
-        line * prev;
+        tag_array* next;
+        tag_array * prev;
 };
+
 

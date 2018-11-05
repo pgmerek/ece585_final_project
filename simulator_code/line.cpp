@@ -6,7 +6,7 @@
 
 #include "header.h"
 
-line::line()
+tag_array::tag_array()
 {
     tag = -1;
     lru = -1;
@@ -15,25 +15,25 @@ line::line()
     mesi = INVALID;
 }
 
-line::~line()
+tag_array::~tag_array()
 {
     next = NULL;
     prev = NULL;
 }
 
-line::set_tag(int new_tag)
+tag_array::set_tag(int new_tag)
 {
     tag = new_tag;
     return 1;
 }
 
-line::set_lru(int new_lru)
+tag_array::set_lru(int new_lru)
 {
     lru = new_lru;
     return 1;
 }
 
-line::get_mesi(char * return_string)
+tag_array::get_mesi(char * return_string)
 {
     switch(mesi)
     {
@@ -55,4 +55,3 @@ line::get_mesi(char * return_string)
             return 0;
     return 1;
 }
-

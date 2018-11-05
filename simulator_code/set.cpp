@@ -15,16 +15,16 @@ set::set(int set_associativity, int set_index, int set_address_bits, int set_ind
     offset_bits = set_offset_bits;
     count = 0;
     
-    all_lines = new line[associativity];
+    all_lines = new tag_array[associativity];
     first_line = NULL;
     last_line = NULL;
 }
 
 set::~set()
 {
-    if(lines)
-        delete [] lines;
-    lines = NULL;
+    if(all_lines)
+        delete [] all_lines;
+    all_lines = NULL;
     first_line = NULL;
     last_line = NULL;
 }
@@ -40,16 +40,17 @@ set::read(unsigned int tag)
     }
     else
     {
-    for(int j = 0; j < associativity; ++j)
-            {
-                // If line is valid AND line tag matches the desired tag
-                if(all_lines[j].mesi != INVALID && tag == lines[j].tag)
-                {
-                    printf("hit!");
-                    update_lru();
-                    return HIT;
-                }
-            }
+	    for(int j = 0; j < associativity; ++j)
+		    {
+			// If line is valid AND line tag matches the desired tag
+			if(all_[j].mesi != INVALID && tag == all_lines[j].tag)
+			{
+			    printf("hit!");
+			    update_lru();
+			    return HIT;
+			}
+		    }
+    }
 
     
     

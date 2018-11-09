@@ -15,43 +15,66 @@ set::set(int set_associativity, int set_index, int set_address_bits, int set_ind
     offset_bits = set_offset_bits;
     count = 0;
     
-    all_lines = new tag_array[associativity];
-    first_line = NULL;
-    last_line = NULL;
+    all_tags = new tag_array[associativity];
+    first_tag = NULL;
+    last_tag = NULL;
 }
 
 set::~set()
 {
-    if(all_lines)
-        delete [] all_lines;
-    all_lines = NULL;
-    first_line = NULL;
-    last_line = NULL;
+    if(all_tags)
+        delete [] all_tags;
+    all_tags = NULL;
+    first_tag = NULL;
+    last_tag = NULL;
 }
 
-set::read(unsigned int tag)
+int set::read(unsigned int tag)
 {
-    result = -1;
+    int result = MISS;
     if(count == 0)   // Make sure there's data
+        printf("miss, no data");
+    else
+	    for(int j = 0; j < associativity; ++j)
+        {
+			// If line is valid AND line tag matches the desired tag
+			if(all_tags[j].get_mesi() != INVALID && all_tags[j].get_tag() == tag)     // Tag might not be the right comparator
+			{
+			    printf("hit!");
+			    result = HIT;
+                break;
+			}
+        }
+
+    switch(result)  // Call the appropriate handlers depending on whether there was a read hit or miss
     {
-        print("miss, no data");
-        read_miss_handler();
-        result = MISS;
+        case MISS:
+            read_miss_handler(tag);
+            break;
+        case HIT:
+            update_lru();
+            break;
+    }
+    
+    return result; 
+}
+
+void set::read_miss_handler(unsigned int tag)
+{
+    if(is_full())   // Evict set if the set is full and is LRU
+    {
+        for(int j = 0; j < associativity; ++j)
+        {
+            if(all_tags[j].get_lru() == 0)
+            {
+                all_tags[j].evict()
+                all_tags[j].set_tag(tag)
+                break;
+            }
+        }
     }
     else
     {
-	    for(int j = 0; j < associativity; ++j)
-		    {
-			// If line is valid AND line tag matches the desired tag
-			if(all_[j].mesi != INVALID && tag == all_lines[j].tag)
-			{
-			    printf("hit!");
-			    update_lru();
-			    return HIT;
-			}
-		    }
-    }
+        
 
-    
-    
-}
+

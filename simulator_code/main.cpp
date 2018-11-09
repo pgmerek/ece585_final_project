@@ -7,7 +7,7 @@
 #include "header.h"
 
 //Arg = mode (0 =summary of staticscs, 1= verbose)
-int main(int arg c, char * argv[])
+int main(int argc, char * argv[])
 {
     
    
@@ -42,3 +42,4 @@ int main(int arg c, char * argv[])
 
 
 */ 
+}

@@ -1,3 +1,4 @@
 # Ignore swap files
 *.swp
 *.swo
+*.o

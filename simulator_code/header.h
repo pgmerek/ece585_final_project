@@ -20,15 +20,16 @@
 #define BUFFER_SIZE 256
 #define HIT 1
 #define MISS 0
+// Define the MESI States
+#define MODIFIED 0
+#define INVALID 1
+#define SHARED 2
+#define EXCLUSIVE 3
 
-// Declare an enum for the MESI bits
-enum enum_mesi
-{
-    MODIFIED    = 0,
-    INVALID     = 1,
-    SHARED      = 2,
-    EXCLUSIVE   = 3
-};
+// Forward declare all classes
+class cache;
+class set;
+class tag_array;
 
 // Declare the necessary classes
 class cache
@@ -61,20 +62,22 @@ class set
     public:
         set(int set_associativity, int set_index, int set_address_bits, int set_index_bits, int set_offset_bits);
         ~set();
-        read(unsigned int tag);
+        int read(unsigned int tag);
+        int is_full(void) const;
 
     private:
-        tag_array * all_lines;   // All lines in the set
-        tag_array * first_line;
-        tag_array * last_line;
+        tag_array * all_tags;   // All lines in the set
+        tag_array * first_tag;
+        tag_array * last_tag;
         int count;
-        unsigned int associativity;
+        int associativity;
         unsigned int index;
         unsigned int address_bits;
         unsigned int index_bits;
         unsigned int offset_bits;
-
-
+        // Private functions
+        void read_miss_handler(void);
+        
 
 };
 
@@ -84,16 +87,16 @@ class tag_array
     public:
         tag_array();
         ~tag_array();
-        int set_tag(int new_tag);
+        int set_tag(unsigned int new_tag);
         int set_lru(int new_lru);
-        int get_mesi(char * return_string) const;
-        int get_tag(void) const { return tag; }
+        int get_mesi(void) const { return mesi; }
+        unsigned int get_tag(void) const { return tag; }
         int get_lru(void) const { return lru; }
 
     private:
-        int tag;
+        unsigned int tag;
         int lru;
-        enum_mesi mesi;
+        int mesi;
         // Pointers to the next and previous lines relative to this line
         tag_array* next;
         tag_array * prev;

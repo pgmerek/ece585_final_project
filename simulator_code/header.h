@@ -64,6 +64,8 @@ class set
         ~set();
         int read(unsigned int tag);
         int is_full(void) const;
+	void read_miss_handler(unsigned int tag);
+	void update_lru(void);
 
     private:
         tag_array * all_tags;   // All lines in the set
@@ -92,6 +94,7 @@ class tag_array
         int get_mesi(void) const { return mesi; }
         unsigned int get_tag(void) const { return tag; }
         int get_lru(void) const { return lru; }
+	void evict(void);
 
     private:
         unsigned int tag;

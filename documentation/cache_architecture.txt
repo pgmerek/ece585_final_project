@@ -12,6 +12,7 @@ The instruction cache will have the following
  -16K sets
  -64 byte lines
  -4 way association
+ -Capacity = 4MB
  
  Addressing bits per line
  -14 index bits (1 bit for each set)
@@ -28,6 +29,7 @@ The data cache will have the following
  -16K sets
  -64 byte lines
  -8 way association
+ -Capacity = 8MB
  
  Addressing bits per line
  -14 index bits (1 bit for each set)

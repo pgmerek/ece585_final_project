@@ -67,14 +67,16 @@ void set::read_miss_handler(unsigned int tag)
         {
             if(all_tags[j].get_lru() == 0)
             {
-                all_tags[j].evict()
-                all_tags[j].set_tag(tag)
+                all_tags[j].evict();
+                all_tags[j].set_tag(tag);
                 break;
             }
         }
     }
-    else
-    {
+}
         
+void set::update_lru()
+{
+}
 
 

@@ -21,15 +21,19 @@ tag_array::~tag_array()
     prev = NULL;
 }
 
-tag_array::set_tag(int new_tag)
+int tag_array::set_tag(unsigned int new_tag)
 {
     tag = new_tag;
     return 1;
 }
 
-tag_array::set_lru(int new_lru)
+int tag_array::set_lru(int new_lru)
 {
     lru = new_lru;
     return 1;
+}
+void tag_array::evict(void)
+{
+
 }
 

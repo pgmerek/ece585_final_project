@@ -10,7 +10,17 @@
 int main(int argc, char * argv[])
 {
     
-   
+  
+
+	char const* const fileName = "test.txt"; 
+	FILE* file = fopen(fileName, "r"); 
+	char line[500];
+
+	while (fgets(line, sizeof(line), file)) {
+	printf("%s", line); 
+	}
+fclose(file);
+ 
         
     /*Scenario 1: Load all of the cache lines of a particular set
      

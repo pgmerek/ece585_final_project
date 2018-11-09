@@ -12,11 +12,11 @@
 
 
 # specify all source files here
-SRCS = main.cpp cache.cpp set.cpp set.cpp tag.cpp header.h
+SRCS = main.cpp #cache.cpp set.cpp set.cpp tag.cpp header.h
 # specify target here (name of executable)
 TARG = cache_simulator
 # specify compiler, compile flags, and needed libs
-CC   = gcc
+CC   = g++
 OPTS = -Wall -O -g
 LIBS = -lm
 # this translates .c files in src list to .o’s

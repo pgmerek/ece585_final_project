@@ -12,11 +12,9 @@
 
 
 # specify all source files here
-SRCS = main.cpp
-#SRCS2 = catcher.c
+SRCS = main.cpp cache.cpp set.cpp set.cpp tag.cpp header.h
 # specify target here (name of executable)
-TARG = main 
-#TARG2 = catcher
+TARG = cache_simulator
 # specify compiler, compile flags, and needed libs
 CC   = gcc
 OPTS = -Wall -O -g

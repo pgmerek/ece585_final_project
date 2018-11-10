@@ -20,8 +20,8 @@ CC   = gcc
 OPTS = -Wall -O -g
 LIBS = -lm
 # this translates .c files in src list to .o’s
-OBJS = $(SRCS:.c=.o) 
-#OBJS2= $(SRCS2:.c=.o)
+OBJS = $(SRCS:.cpp=.o) 
+#OBJS2= $(SRCS2:.cpp=.o)
 # all is not really needed, but is used to generate the target
 all: $(TARG) #$(TARG2)
 # this generates the target executable

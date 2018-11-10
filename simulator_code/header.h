@@ -94,12 +94,12 @@ class tag_array
         int get_lru(void) const { return lru; }
 
     private:
+        // Doesn't store set or byte offset
+        // Set is determined by which set object this tag object is in.
+        // Byte offset might not matter since we're just matching lines
         unsigned int tag;
         int lru;
         int mesi;
-        // Pointers to the next and previous lines relative to this line
-        tag_array* next;
-        tag_array * prev;
 };
 
 

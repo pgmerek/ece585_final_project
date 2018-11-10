@@ -10,8 +10,6 @@ tag_array::tag_array()
 {
     tag = -1;
     lru = -1;
-    next = NULL;
-    prev = NULL;
     mesi = INVALID;
 }
 

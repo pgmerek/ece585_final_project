@@ -26,6 +26,11 @@
 #define SHARED 2
 #define EXCLUSIVE 3
 
+// Address mask constants
+#define MASK_FOR_TAG 0xFFF00000
+#define MASK_FOR_SET 0x000FFFC0
+#define MASK_FOR_BYTE_INDEX = 0x0000003F
+
 // Forward declare all classes
 class cache;
 class set;
@@ -63,7 +68,7 @@ class set
         set(int set_associativity, int set_index, int set_address_bits, int set_index_bits, int set_offset_bits);
         ~set();
         int read(unsigned int tag);
-        int is_full(void) const;
+        int is_full(void);
 	void read_miss_handler(unsigned int tag);
 	void update_lru(void);
 
@@ -104,5 +109,4 @@ class tag_array
         tag_array* next;
         tag_array * prev;
 };
-
 

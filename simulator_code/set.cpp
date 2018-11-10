@@ -78,5 +78,6 @@ void set::read_miss_handler(unsigned int tag)
 void set::update_lru()
 {
 }
-
-
+int set::is_full(void) 
+{
+}

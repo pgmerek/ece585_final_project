@@ -12,10 +12,10 @@ cache::cache(int associativity)
 	reads = 0;
 	writes = 0;
 	operations = 0;
-	Sets = set[NUM_SETS];
+//	Sets = set[NUM_SETS];
 	//create sets of empty lines
-	for (int i = 0; i < NUM_SETS; ++i)
-		Sets[i] = new set(associativity);
+//	for (int i = 0; i < NUM_SETS; ++i)
+//		Sets[i] = new set(associativity);
 	
 }
 /* Amanda's Section */

@@ -45,6 +45,8 @@ class cache
         int get_hits() const { return hits; }
         int get_misses();
         float hit_miss_ratio();
+	int invalid_to_exclusive_memory(tag_array tag);
+
 
     private:
         // Number of...

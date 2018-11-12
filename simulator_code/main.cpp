@@ -43,7 +43,3 @@ int main(int argc, char * argv[])
 
 */ 
 }
-void make_data_cache ()
-{
-	cache data_cache = new cache(NUM_DATA);
-}

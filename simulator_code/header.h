@@ -6,6 +6,7 @@
 
 #include <cstdio>
 #include <cstring>
+#include <string>
 
 #define NUM_SETS 16384
 #define BYTE_LINES 64
@@ -45,7 +46,11 @@ class cache
         int get_hits() const { return hits; }
         int get_misses();
         float hit_miss_ratio();
-	int invalid_to_exclusive_memory(tag_array tag);
+	int invalid_memory(tag_array tag, int operation);
+	int invalid_snoop(tag_array tag);
+	int shared_memory(tag_array tag);
+	int shared_snoop(tag_array tag);
+	int snoop(unsigned int tag);
 
 
     private:

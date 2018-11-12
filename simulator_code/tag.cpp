@@ -15,8 +15,6 @@ tag_array::tag_array()
 
 tag_array::~tag_array()
 {
-    next = NULL;
-    prev = NULL;
 }
 
 int tag_array::set_tag(unsigned int new_tag)
@@ -29,6 +27,11 @@ int tag_array::set_lru(int new_lru)
 {
     lru = new_lru;
     return 1;
+}
+int tag_array::set_mesi(int new_mesi)
+{
+	mesi = new_mesi;
+	return 1;
 }
 void tag_array::evict(void)
 {

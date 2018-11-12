@@ -5,6 +5,19 @@
  */
 
 #include "header.h"
+cache::cache(int associativity)
+{
+	hits = 0;
+	misses = 0;
+	reads = 0;
+	writes = 0;
+	operations = 0;
+	Sets = set[NUM_SETS];
+	//create sets of empty lines
+	for (int i = 0; i < NUM_SETS; ++i)
+		Sets[i] = new set(associativity);
+	
+}
 /* Amanda's Section */
 // Tranisitions 1 - 3 
 
@@ -36,7 +49,21 @@
 /* Emma's section */
 // Transition 4 - 5
 
+/* This should happen when when the cpu is doing a read and 
+ * the data is not in this cache or the L2 cache.
+ * Cache reads reads the line in from memory and changes the 
+ * line from I to E
+ */
 
+int cache::invalid_to_exclusive_memory(tag_array tag)
+{
+	tag.set_mesi(EXCLUSIVE);
+
+
+
+		
+
+}
 
 
 

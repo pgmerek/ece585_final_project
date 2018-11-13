@@ -19,6 +19,15 @@ set::set(int set_associativity, int set_index, int set_address_bits, int set_ind
     first_tag = NULL;
     last_tag = NULL;
 }
+set::set(int associativity)
+{
+/*	all_tags = new tag_array[associativity];
+	for (int i = 0; i < associativity; ++i)
+	{
+		tag_array[i] = new tag_array();
+	}*/
+}
+
 
 set::~set()
 {
@@ -78,5 +87,6 @@ void set::read_miss_handler(unsigned int tag)
 void set::update_lru()
 {
 }
-
-
+int set::is_full(void) 
+{
+}

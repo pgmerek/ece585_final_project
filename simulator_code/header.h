@@ -48,8 +48,8 @@ class cache
         float hit_miss_ratio();
 	int invalid_memory(tag_array tag, int operation);
 	int invalid_snoop(tag_array tag);
-	int shared_memory(tag_array tag);
-	int shared_snoop(tag_array tag);
+	int shared_memory(tag_array tag, int operatoion);
+	int shared_snoop(tag_array tag, int operation);
 	int snoop(unsigned int tag);
 
 

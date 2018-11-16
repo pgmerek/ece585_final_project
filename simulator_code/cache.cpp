@@ -88,12 +88,26 @@ int cache::invalid_snoop(tag_array tag)
 }
 
 // Transition handlers for lines that are Shared
-int cache::shared_memory(tag_array tag)
+int cache::shared_memory(tag_array tag, int operation)
 {
+	// read
+	if (operation == 0)
+		tag.set_tag(SHARED);
+	// write
+	// also need to send a write command to the L2 cache
+	else if (operation == 1)
+		tag.set_tag(MODIFIED);
+
 }
 
-int cache::shared_snoop(tag_array tag)
+int cache::shared_snoop(tag_array tag, int operation)
 {
+	// if L2 cache said to invalidate this line
+	if (operation == 3)
+		tag.set_tag(INVALID);
+	// if L2 is reading a line that is already shared
+	else if (operation == 4)
+		tag.set_tag(SHARED);
 }
 // Every time we snoop to L2, it will always 
 // come back false because for this project

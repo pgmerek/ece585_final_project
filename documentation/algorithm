@@ -1,0 +1,96 @@
+main()
+{
+    instantiate instruction cache
+    instantiate data cache
+
+    TBA: Create a format for statuses
+
+    read in file 
+    for each line in the file
+    {
+	    parse file for operation and address
+
+	    switch (operation)
+	    {
+		case 0: //read data request: sent to L1 from memory 
+		    check for address in data cache
+		    if (not there)
+			check if full
+			    if full
+				evict
+			    add line as invalid
+		    update mesi.memory access
+		    update LRU
+		case 1: // write to L1 data cache: sent to L1 cache from memory
+		    check for address in data cache
+		    if (not there)
+			check if full
+			    if full
+				evict
+			    add line as invalid
+		    update mesi.memory access
+		    update LRU
+		case 2: // read from instruction cache
+		    check for address in instruction cache
+		    if (not there)
+			check if full
+			    if full
+				evict
+			    add line as invalid
+		    update mesi.memory access
+		    update LRU
+		case 3: // invalidate from L2
+			check for address in instruction and data cache
+			    if (not there)
+				check if full
+				    if full
+					evict
+				    add line as invalid
+			    update mesi.memory access
+			    update LRU
+		case 4: // data request from L2
+			check for address in instruction and data cache
+			    if (not there)
+				check if full
+				    if full
+					evict
+				    add line as invalid
+			    update mesi.snoop
+			    update LRU
+
+		case 8: //clear cache and reset all statistics 
+		    for all items in each cache
+			evict
+		case 9: // print contents and state of the cache 
+		    for each item in the cache 
+			print  tag, mesi, and lru 
+
+	}
+
+	print current hit, miss, write, read, and hit rate
+	if (verbose mode)
+	    print all L2 messages
+
+    }
+
+}
+    
+messages for L2
+    keep a list of messages 
+    keep a bit to indacate which ones have been printed out
+    print out all messages that have not been printed out yet and change the messages to indicate that they have been printed
+
+lru
+    update lru of current line
+    update lru of all lines that are newer than current line
+
+parse file 
+    read operation 
+    read address
+    for address
+    {
+	get the tag 
+	get the index
+	get byte offset
+    }
+    use inde

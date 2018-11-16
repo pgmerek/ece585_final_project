@@ -8,6 +8,7 @@ main()
     read in file 
     for each line in the file
     {
+	    parse file for operation and address
 
 	    switch (operation)
 	    {
@@ -66,5 +67,19 @@ main()
 
 	}
 
+	print current hit, miss, write, read, and hit rate
+	if (verbose mode)
+	    print all L2 messages
 
     }
+
+}
+    
+messages for L2
+    keep a list of messages 
+    keep a bit to indacate which ones have been printed out
+    print out all messages that have not been printed out yet and change the messages to indicate that they have been printed
+
+lru
+    update lru of current line
+    update lru of all lines that are newer than current line

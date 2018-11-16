@@ -83,3 +83,14 @@ messages for L2
 lru
     update lru of current line
     update lru of all lines that are newer than current line
+
+parse file 
+    read operation 
+    read address
+    for address
+    {
+	get the tag 
+	get the index
+	get byte offset
+    }
+    use inde

@@ -6,16 +6,18 @@
 
 #include <cstdio>
 #include <cstring>
+#include <cstdlib>
+#include <fstream>
 
+using namespace std;
+
+#define NUM_SETS 16384
+#define BYTE_LINES 64
 #define CPU_BITS 32
 // Instruction cache constants
 #define INSTR_NUM_LINES 4
-#define INSTR_NUM_SETS 16384
-#define INSTR_BYTE_LINES 64
 // Data cache constants
 #define DATA_NUM_LINES 8
-#define DATA_NUM_SETS 16384
-#define DATA_BYTE_LINES 64
 // Standard size for character array buffers
 #define BUFFER_SIZE 256
 #define HIT 1
@@ -26,22 +28,34 @@
 #define SHARED 2
 #define EXCLUSIVE 3
 
+// Address mask constants
+#define MASK_FOR_TAG 0xFFF00000
+#define MASK_FOR_SET 0x000FFFC0
+#define MASK_FOR_BYTE_INDEX = 0x0000003F
+
 // Forward declare all classes
 class cache;
 class set;
-class tag_array;
+class entry;
 
 // Declare the necessary classes
 class cache
 {
     public:
-        cache();
+        cache(int assoc);
         ~cache();
         int get_reads() const { return reads; } 
         int get_writes() const { return writes; }
         int get_hits() const { return hits; }
-        int get_misses();
-        float hit_miss_ratio();
+        int get_misses() const { return misses; }
+        int reset_stats();
+        float hit_miss_ratio() const;
+        int invalid_memory(entry tag, int operation);
+        int invalid_snoop(entry tag);
+        int shared_memory(entry tag, int operatoion);
+        int shared_snoop(entry tag, int operation);
+        int snoop(unsigned int tag);
+
 
     private:
         // Number of...
@@ -51,24 +65,24 @@ class cache
         int writes;
         int operations;
         // Cache parameters
-        int set_size;
         int associativity;
         // Pointer to the sets in the cache
-        set * Sets;
+        set ** Sets;
 };
 
 class set
 {
     public:
         set(int set_associativity, int set_index, int set_address_bits, int set_index_bits, int set_offset_bits);
+        set (int associativity);
         ~set();
         int read(unsigned int tag);
-        int is_full(void) const;
+        int is_full(void);
+        void read_miss_handler(unsigned int tag);
+        void update_lru(void);
 
     private:
-        tag_array * all_tags;   // All lines in the set
-        tag_array * first_tag;
-        tag_array * last_tag;
+        entry * all_tags;   // All lines in the set
         int count;
         int associativity;
         unsigned int index;
@@ -81,25 +95,52 @@ class set
 
 };
 
-// Tag array for each line
-class tag_array
+// Object for tag array/entry/line
+class entry
 {
     public:
-        tag_array();
-        ~tag_array();
-        int set_tag(unsigned int new_tag);
-        int set_lru(int new_lru);
-        int get_mesi(void) const { return mesi; }
-        unsigned int get_tag(void) const { return tag; }
+        entry();
+        ~entry();
+        // Set functions
+        void set_tag(int new_tag) { tag = new_tag; };
+        void set_index(int new_index) { index = new_index; };
+        void set_offset(int new_offset) { offset = new_offset; };
+        void set_lru(int new_lru) { lru = new_lru; };
+        void set_mesi(int new_mesi) { mesi = new_mesi; };
+        void set_raw_address(int new_raw_address) { raw_address = new_raw_address; };
+        // Get functions
+        int get_tag(void) const { return tag; }
+        int get_index(void) const { return index; }
+        int get_offset(void) const { return offset; }
         int get_lru(void) const { return lru; }
+        int get_mesi(void) const { return mesi; }
+        int get_raw_address(void) const { return raw_address; }
+        // All others
+        void evict(void);
+        void copy_entry(entry to_copy);
+        int compare_entries(entry to_compare) const;
 
     private:
-        unsigned int tag;
+        int tag;
+        int index;
+        int offset;
         int lru;
         int mesi;
-        // Pointers to the next and previous lines relative to this line
-        tag_array* next;
-        tag_array * prev;
+        int raw_address;
 };
 
+class traces
+{
+    public:
+        traces(void);
+        ~traces(void);
+        bool populate(char * line, bool verbose);
+        int get_operation(void) const { return operation; };
+        int get_address(void) const { return address; };
+    private:
+        int operation;
+        bool has_address;   // False for operations 8 and 9, true otherwise
+        int address;
+};
 
+int read_file(traces ** references, char * fileName, bool verbose);

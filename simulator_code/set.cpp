@@ -16,17 +16,22 @@ set::set(int set_associativity, int set_index, int set_address_bits, int set_ind
     count = 0;
     
     all_tags = new tag_array[associativity];
-    first_tag = NULL;
-    last_tag = NULL;
 }
+set::set(int associativity)
+{
+/*	all_tags = new tag_array[associativity];
+	for (int i = 0; i < associativity; ++i)
+	{
+		tag_array[i] = new tag_array();
+	}*/
+}
+
 
 set::~set()
 {
     if(all_tags)
         delete [] all_tags;
     all_tags = NULL;
-    first_tag = NULL;
-    last_tag = NULL;
 }
 
 int set::read(unsigned int tag)
@@ -67,14 +72,17 @@ void set::read_miss_handler(unsigned int tag)
         {
             if(all_tags[j].get_lru() == 0)
             {
-                all_tags[j].evict()
-                all_tags[j].set_tag(tag)
+                all_tags[j].evict();
+                all_tags[j].set_tag(tag);
                 break;
             }
         }
     }
-    else
-    {
+}
         
-
-
+void set::update_lru()
+{
+}
+int set::is_full(void) 
+{
+}

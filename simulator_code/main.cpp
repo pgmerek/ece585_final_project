@@ -40,12 +40,17 @@ int main(int argc, char * argv[])
     for (int k = 0; k < num_lines; ++k)
     {
         operation = references[k].get_operation();
-        address = references[k].get_address();
+        raw_address = references[k].get_address();
+        entry(raw_address);
+        address =
+        tag = 
+        index =
+        offset = 
         
         switch (operation)
         {
             case 0: // Read data request, sent to L1 from memory
-            
+                data.
                 break;
             case 1: // Write to L1 data cache, sent to L1 from memory
                 break;

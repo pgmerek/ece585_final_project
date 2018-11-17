@@ -12,7 +12,7 @@ int main(int argc, char * argv[])
     // Read in the file before doing anything else
     char fileName[BUFFER_SIZE];
     bool verbose = false;
-    if (argc != 2)
+    if (argc == 3)
     {
         strcpy(fileName, argv[1]);
         verbose = atoi(argv[2]);
@@ -23,7 +23,10 @@ int main(int argc, char * argv[])
         return 0;
     }
 
+
     printf("You entered '%s' and '%d' for verbose.\n", fileName, verbose);
+    traces example_trace("8");
+    printf("Operation: %d\nAddress: %d\n", example_trace.get_operation(), example_trace.get_address());
     // Instantiate the two caches
 
    

@@ -119,7 +119,7 @@ class tag_array
 class traces
 {
     public:
-        traces(int new_operation, char * new_address);
+        traces(char * line);
         ~traces(void);
         int get_operation(void) const { return operation; };
         long int get_address(void) const { return address; };

@@ -11,7 +11,10 @@ traces::traces(char * line)
     char * endPtr;
     operation = strtol(line, &endPtr, 10);  // Reads the operation from the line
     if (operation >= 8)
+    {
         has_address = false;
+        address = -1;
+    }
     else
     {
         has_address = true;
@@ -19,7 +22,7 @@ traces::traces(char * line)
     }
 }
 
-traces::~traces();
+traces::~traces()
 {
     operation = -1;
     address = 0;

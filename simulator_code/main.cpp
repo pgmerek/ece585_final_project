@@ -9,9 +9,10 @@
 //Arg = mode (0 =summary of staticscs, 1= verbose)
 int main(int argc, char * argv[])
 {
-    // Read in the file before doing anything else
     char fileName[BUFFER_SIZE];
     bool verbose = false;
+    traces * references = NULL;
+
     if (argc == 3)
     {
         strcpy(fileName, argv[1]);
@@ -22,12 +23,15 @@ int main(int argc, char * argv[])
         printf("Please enter the name of the file to read in and whether you want verbose debug printouts.\n");
         return 0;
     }
-
-
-    printf("You entered '%s' and '%d' for verbose.\n", fileName, verbose);
-    traces example_trace("8");
-    printf("Operation: %d\nAddress: %d\n", example_trace.get_operation(), example_trace.get_address());
+    // Read data from file
+    if (!read_file(references, fileName))
+    {
+        printf("An error occured when reading the file. Exiting....\n");
+        return 0;
+    }
     // Instantiate the two caches
+    cache data(DATA_NUM_LINES);
+    cache instruction(INSTR_NUM_LINES);
 
    
         
@@ -63,3 +67,48 @@ int main(int argc, char * argv[])
 */ 
     return 1;
 }
+
+
+int read_file(traces * references, char * fileName)
+{
+    char buffer[BUFFER_SIZE];
+    int count = 0;
+    int i = 0;  // Used to iterate through the references
+    bool error = false;
+    ifstream in;   // Open a new read-only file stream
+    in.open(fileName);
+
+    if (!in)    // If the file doesn't exist, return an error
+        return 0;
+
+    while (!in.eof())   // Get number of lines
+    {
+        in.get(buffer, BUFFER_SIZE, '\n');
+        in.get();   // Pauses between lines
+        ++count;
+        if (in.eof())   // Prevents an off by one error
+            --count;
+    }
+
+    in.clear();     // Clear eof flag
+    in.seekg (0, ios::beg); // Return to beginning of file
+    references = new traces[count]; // Create a dynamic array of traces
+
+    for (int k = 0; k < count; ++k)
+    {
+        in.get(buffer, BUFFER_SIZE, '\n');  // Read each line
+        in.get();   // Chills bruh
+        references[i++].populate(buffer);
+    }
+    in.close();
+
+    if (error)
+    {
+        if (references) // Prevent memory leak
+            delete [] references;
+        return 0;
+    }
+    
+    return 1;
+}
+

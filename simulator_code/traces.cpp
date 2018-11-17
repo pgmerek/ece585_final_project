@@ -6,20 +6,11 @@
 
 #include "header.h"
         
-traces::traces(char * line)
+traces::traces()
 {
-    char * endPtr;
-    operation = strtol(line, &endPtr, 10);  // Reads the operation from the line
-    if (operation >= 8)
-    {
-        has_address = false;
-        address = -1;
-    }
-    else
-    {
-        has_address = true;
-        address = strtol(endPtr, NULL, 16);  // Convert hex string address to long integer
-    }
+    operation = -1;
+    address = 0;
+    has_address = false;
 }
 
 traces::~traces()
@@ -29,3 +20,25 @@ traces::~traces()
     has_address = false;
 }
 
+bool traces::populate(char * line)
+{
+    char * endPtr;
+    bool error = true;
+    if (line)
+    {
+        operation = strtol(line, &endPtr, 10);  // Reads the operation from the line
+        if (operation >= 8)
+        {
+            has_address = false;
+            address = -1;
+        }
+        else
+        {
+            has_address = true;
+            address = strtoull(endPtr, NULL, 16);  // Convert hex string address to long integer
+        }
+        error = false;
+    }
+
+    return error;
+}

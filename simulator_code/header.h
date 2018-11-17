@@ -7,6 +7,9 @@
 #include <cstdio>
 #include <cstring>
 #include <cstdlib>
+#include <fstream>
+
+using namespace std;
 
 #define NUM_SETS 16384
 #define BYTE_LINES 64
@@ -46,11 +49,11 @@ class cache
         int get_hits() const { return hits; }
         int get_misses();
         float hit_miss_ratio();
-	int invalid_memory(tag_array tag, int operation);
-	int invalid_snoop(tag_array tag);
-	int shared_memory(tag_array tag, int operatoion);
-	int shared_snoop(tag_array tag, int operation);
-	int snoop(unsigned int tag);
+        int invalid_memory(tag_array tag, int operation);
+        int invalid_snoop(tag_array tag);
+        int shared_memory(tag_array tag, int operatoion);
+        int shared_snoop(tag_array tag, int operation);
+        int snoop(unsigned int tag);
 
 
     private:
@@ -119,12 +122,15 @@ class tag_array
 class traces
 {
     public:
-        traces(char * line);
+        traces(void);
         ~traces(void);
+        bool populate(char * line);
         int get_operation(void) const { return operation; };
-        long int get_address(void) const { return address; };
+        unsigned long long int get_address(void) const { return address; };
     private:
         int operation;
         bool has_address;   // False for operations 8 and 9, true otherwise
-        long int address;
+        unsigned long long int address;
 };
+
+int read_file(traces * references, char * fileName);

@@ -9,7 +9,23 @@
 //Arg = mode (0 =summary of staticscs, 1= verbose)
 int main(int argc, char * argv[])
 {
-    
+    // Read in the file before doing anything else
+    char fileName[BUFFER_SIZE];
+    bool verbose = false;
+    if (argc != 2)
+    {
+        strcpy(fileName, argv[1]);
+        verbose = atoi(argv[2]);
+    }
+    else
+    {
+        printf("Please enter the name of the file to read in and whether you want verbose debug printouts.\n");
+        return 0;
+    }
+
+    printf("You entered '%s' and '%d' for verbose.\n", fileName, verbose);
+    // Instantiate the two caches
+
    
         
     /*Scenario 1: Load all of the cache lines of a particular set
@@ -42,4 +58,5 @@ int main(int argc, char * argv[])
 
 
 */ 
+    return 1;
 }

@@ -6,7 +6,7 @@
 
 #include <cstdio>
 #include <cstring>
-#include <string>
+#include <cstdlib>
 
 #define NUM_SETS 16384
 #define BYTE_LINES 64
@@ -116,3 +116,15 @@ class tag_array
         int mesi;
 };
 
+class traces
+{
+    public:
+        traces(int new_operation, char * new_address);
+        ~traces(void);
+        int get_operation(void) const { return operation; };
+        long int get_address(void) const { return address; };
+    private:
+        int operation;
+        bool has_address;   // False for operations 8 and 9, true otherwise
+        long int address;
+};

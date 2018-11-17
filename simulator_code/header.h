@@ -42,7 +42,7 @@ class tag_array;
 class cache
 {
     public:
-        cache(int associativity);
+        cache(int assoc);
         ~cache();
         int get_reads() const { return reads; } 
         int get_writes() const { return writes; }
@@ -66,24 +66,22 @@ class cache
         // Cache parameters
         int associativity;
         // Pointer to the sets in the cache
-        set * Sets;
+        set ** Sets;
 };
 
 class set
 {
     public:
         set(int set_associativity, int set_index, int set_address_bits, int set_index_bits, int set_offset_bits);
-	set (int associativity);
+        set (int associativity);
         ~set();
         int read(unsigned int tag);
         int is_full(void);
-	void read_miss_handler(unsigned int tag);
-	void update_lru(void);
+        void read_miss_handler(unsigned int tag);
+        void update_lru(void);
 
     private:
         tag_array * all_tags;   // All lines in the set
-        tag_array * first_tag;
-        tag_array * last_tag;
         int count;
         int associativity;
         unsigned int index;
@@ -105,10 +103,10 @@ class tag_array
         int set_tag(unsigned int new_tag);
         int set_lru(int new_lru);
         int get_mesi(void) const { return mesi; }
-	int set_mesi (int new_mesi);
+        int set_mesi (int new_mesi);
         unsigned int get_tag(void) const { return tag; }
         int get_lru(void) const { return lru; }
-	void evict(void);
+        void evict(void);
 
     private:
         // Doesn't store set or byte offset
@@ -124,13 +122,13 @@ class traces
     public:
         traces(void);
         ~traces(void);
-        bool populate(char * line);
+        bool populate(char * line, bool verbose);
         int get_operation(void) const { return operation; };
-        unsigned long long int get_address(void) const { return address; };
+        int get_address(void) const { return address; };
     private:
         int operation;
         bool has_address;   // False for operations 8 and 9, true otherwise
-        unsigned long long int address;
+        int address;
 };
 
-int read_file(traces * references, char * fileName);
+int read_file(traces ** references, char * fileName, bool verbose);

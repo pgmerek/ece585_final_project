@@ -20,7 +20,7 @@ traces::~traces()
     has_address = false;
 }
 
-bool traces::populate(char * line)
+bool traces::populate(char * line, bool verbose)
 {
     char * endPtr;
     bool error = true;
@@ -31,11 +31,15 @@ bool traces::populate(char * line)
         {
             has_address = false;
             address = -1;
+            if (verbose)
+                printf("Operation: %d, address: (none)\n", operation);
         }
         else
         {
             has_address = true;
-            address = strtoull(endPtr, NULL, 16);  // Convert hex string address to long integer
+            address = strtol(endPtr, NULL, 16);  // Convert hex string address to long integer
+            if (verbose)
+                printf("Operation: %d, address: %x.\n", operation, address);
         }
         error = false;
     }

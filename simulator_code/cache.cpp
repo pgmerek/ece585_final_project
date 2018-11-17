@@ -5,18 +5,39 @@
  */
 
 #include "header.h"
-cache::cache(int associativity)
+cache::cache(int assoc)
 {
 	hits = 0;
 	misses = 0;
 	reads = 0;
 	writes = 0;
 	operations = 0;
-//	Sets = set[NUM_SETS];
+    associativity = assoc;
 	//create sets of empty lines
-//	for (int i = 0; i < NUM_SETS; ++i)
-//		Sets[i] = new set(associativity);
+	Sets = new set * [NUM_SETS];
+	//Set each set to NULL
+	for (int i = 0; i < NUM_SETS; ++i)
+		Sets[i] = NULL;
 	
+}
+
+cache::~cache()
+{
+    hits = -1;
+    misses = -1;
+    reads = -1;
+    writes = -1;
+    operations = -1;
+    associativity = -1;
+    // Delete each set
+	for (int i = 0; i < NUM_SETS; ++i)
+    {
+        if (Sets[i])
+            delete Sets[i];
+    }
+    // Delete the array of sets
+    if (Sets)
+        delete [] Sets;
 }
 /* Amanda's Section */
 // Tranisitions: All transitions for lines that that are Modified

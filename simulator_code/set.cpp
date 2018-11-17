@@ -16,8 +16,6 @@ set::set(int set_associativity, int set_index, int set_address_bits, int set_ind
     count = 0;
     
     all_tags = new tag_array[associativity];
-    first_tag = NULL;
-    last_tag = NULL;
 }
 set::set(int associativity)
 {
@@ -34,8 +32,6 @@ set::~set()
     if(all_tags)
         delete [] all_tags;
     all_tags = NULL;
-    first_tag = NULL;
-    last_tag = NULL;
 }
 
 int set::read(unsigned int tag)

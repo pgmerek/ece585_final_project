@@ -82,7 +82,7 @@ class set
         int contains(entry compare_to);
         int is_full(void);
         int is_empty(void);
-        void evict(entry to_add, int verbose);
+        int evict(entry to_add, int verbose);
         void update_lru(int index);
 
     private:

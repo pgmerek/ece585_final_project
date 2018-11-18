@@ -30,7 +30,7 @@ entry::~entry()
 
 void entry::evict()
 {
-    printf("Entry evicted.");
+    printf("Entry evicted.\n");
     empty = 1;
 }
 

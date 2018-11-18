@@ -63,16 +63,22 @@ int set::write(entry to_add, int verbose)
 {
     int success = 0;
     int j = 0;
+    int lru_index = -1; // If the set is full, this is where we should write the new entry
     if (all_tags)
     {
         // Try to find the first empty entry
         while (!all_tags[j].is_empty() && j < associativity)
             ++j;
 
-        if (j == associativity) // Set is full
-            evict(to_add, verbose);
-        else
+        if (j == associativity - 1) // Set is full
         {
+            printf("Set full in write operation. Evicting the lru.\n");
+            lru_index = evict(to_add, verbose);
+            update_lru(lru_index);
+        }
+        else    // Set isn't full
+        {
+            printf("Set isn't full in write operation.\n");
             all_tags[j].copy_entry(to_add, verbose);
             update_lru(j);
         }
@@ -84,22 +90,22 @@ int set::write(entry to_add, int verbose)
     return success;
 }
 
-void set::evict(entry to_add, int verbose)
+int set::evict(entry to_add, int verbose)
 {
     for(int j = 0; j < associativity; ++j)
     {
-        if(all_tags[j].get_lru() == 0)
+        if(all_tags[j].get_lru() == 0)  // Search for the lru
         {
             all_tags[j].evict();
             all_tags[j].copy_entry(to_add, verbose);
-            update_lru(j);
-            break;
+            return j;
         }
     }
 }
         
 void set::update_lru(int entry_index)     // Index is this context is NOT the same set index. This index just tells the function where the new entry is in the set
 {
+    int old_lru = all_tags[entry_index].get_lru();
     for (int k = 0; k < associativity; ++k)
     {
         if (k == entry_index)   // Set the new entry to the MRU
@@ -107,7 +113,8 @@ void set::update_lru(int entry_index)     // Index is this context is NOT the sa
             all_tags[k].set_lru(7);
             printf("Setting lru to 7 for new entry.\n");
         }
-        else    // Decrement all others
+        // Decrement all other that were newer than the previous entry
+        else if (all_tags[k].get_lru() > old_lru)
             all_tags[k].dec_lru();
     }
 }

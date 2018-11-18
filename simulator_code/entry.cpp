@@ -31,7 +31,7 @@ void entry::evict()
     printf("Entry evicted.");
 }
 
-int compare_entries(entry to_compare)
+int entry::compare_entries(entry to_compare) const
 {
     if (raw_address != to_compare.get_raw_address())
         return 0;
@@ -39,8 +39,22 @@ int compare_entries(entry to_compare)
     return 1;
 }
 
-void copy_entry(entry to_copy)
+void entry::copy_entry(entry to_copy, int verbose)
 {
     raw_address = to_copy.get_raw_address();
-    tag = raw_address;
+    tag = (raw_address & MASK_FOR_TAG) >> 20;
+    index = (raw_address & MASK_FOR_INDEX) >> 6;
+    offset = raw_address & MASK_FOR_BYTE_OFFSET;
+    if (verbose >= 1)
+        printf("Copied raw_address %x, tag %d, index %d, and offset %d.\n", raw_address, tag, index, offset);
 }
+
+void entry::populate_entry(int raw_address, int verbose)
+{
+    tag = (raw_address & MASK_FOR_TAG) >> 20;
+    index = (raw_address & MASK_FOR_INDEX) >> 6;
+    offset = raw_address & MASK_FOR_BYTE_OFFSET;
+    if (verbose >= 1)
+        printf("Created tag %d, index %d, and offset %d.\n", tag, index, offset);
+}
+

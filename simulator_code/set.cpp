@@ -6,64 +6,51 @@
 
 #include "header.h"
 
-set::set(int set_associativity, int set_index, int set_address_bits, int set_index_bits, int set_offset_bits)
+
+set::set(int assoc)
 {
-    associativity = set_associativity;
-    index = set_index;
-    address_bits = set_address_bits;
-    index_bits = set_index_bits;
-    offset_bits = set_offset_bits;
+    associativity = assoc;
     count = 0;
-    
-    all_tags = new tag_array[associativity];
-}
-set::set(int associativity)
-{
-/*	all_tags = new tag_array[associativity];
-	for (int i = 0; i < associativity; ++i)
-	{
-		tag_array[i] = new tag_array();
-	}*/
+	all_tags = new entry[associativity];
 }
 
+set::set(int assoc, entry new_entry, int verbose)
+{
+    associativity = assoc;
+    count = 0;
+	all_tags = new entry[associativity];
+    all_tags[0].copy_entry(new_entry, verbose);
+}
 
 set::~set()
 {
-    if(all_tags)
+    associativity = -1;
+    count = -1;
+    if (all_tags)
+    {
+     /*   for (int k = 0; k < associativity; ++k)
+            if (all_tags[k])
+                delete all_tags[k];
+*/
         delete [] all_tags;
-    all_tags = NULL;
+        all_tags = NULL;
+    }
 }
-
-int set::read(unsigned int tag)
+int set::contains(entry compare_to) const
 {
     int result = MISS;
-    if(count == 0)   // Make sure there's data
-        printf("miss, no data");
-    else
-	    for(int j = 0; j < associativity; ++j)
-        {
-			// If line is valid AND line tag matches the desired tag
-			if(all_tags[j].get_mesi() != INVALID && all_tags[j].get_tag() == tag)     // Tag might not be the right comparator
-			{
-			    printf("hit!");
-			    result = HIT;
-                break;
-			}
-        }
-
-    switch(result)  // Call the appropriate handlers depending on whether there was a read hit or miss
+    if (all_tags)
     {
-        case MISS:
-            read_miss_handler(tag);
-            break;
-        case HIT:
-            update_lru();
-            break;
+        for (int j = 0; j < associativity; ++j)
+        {
+            if (all_tags[j].compare_entries(compare_to))
+                result = HIT;
+        }
     }
-    
-    return result; 
+        
+    return result;
 }
-
+   
 void set::read_miss_handler(unsigned int tag)
 {
     if(is_full())   // Evict set if the set is full and is LRU

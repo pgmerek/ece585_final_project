@@ -30,8 +30,8 @@ using namespace std;
 
 // Address mask constants
 #define MASK_FOR_TAG 0xFFF00000
-#define MASK_FOR_SET 0x000FFFC0
-#define MASK_FOR_BYTE_INDEX = 0x0000003F
+#define MASK_FOR_INDEX 0x000FFFC0
+#define MASK_FOR_BYTE_OFFSET 0x0000003F
 
 // Forward declare all classes
 class cache;
@@ -52,10 +52,10 @@ class cache
         float hit_miss_ratio() const;
         int invalid_memory(entry tag, int operation);
         int invalid_snoop(entry tag);
-        int shared_memory(entry tag, int operatoion);
+        int shared_memory(entry tag, int operation);
         int shared_snoop(entry tag, int operation);
         int snoop(unsigned int tag);
-
+        int contains(entry compare_to);
 
     private:
         // Number of...
@@ -73,10 +73,11 @@ class cache
 class set
 {
     public:
-        set(int set_associativity, int set_index, int set_address_bits, int set_index_bits, int set_offset_bits);
-        set (int associativity);
-        ~set();
+        set(int assoc, entry new_entry, int verbose);
+        set(int assoc);
+        ~set(void);
         int read(unsigned int tag);
+        int contains(entry compare_to) const;
         int is_full(void);
         void read_miss_handler(unsigned int tag);
         void update_lru(void);
@@ -85,10 +86,10 @@ class set
         entry * all_tags;   // All lines in the set
         int count;
         int associativity;
-        unsigned int index;
+        /*unsigned int index;
         unsigned int address_bits;
         unsigned int index_bits;
-        unsigned int offset_bits;
+        unsigned int offset_bits;*/
         // Private functions
         void read_miss_handler(void);
         
@@ -117,7 +118,8 @@ class entry
         int get_raw_address(void) const { return raw_address; }
         // All others
         void evict(void);
-        void copy_entry(entry to_copy);
+        void copy_entry(entry to_copy, int verbose);
+        void populate_entry(int raw_address, int verbose);
         int compare_entries(entry to_compare) const;
 
     private:
@@ -134,7 +136,7 @@ class traces
     public:
         traces(void);
         ~traces(void);
-        bool populate(char * line, bool verbose);
+        bool populate(char * line, int verbose);
         int get_operation(void) const { return operation; };
         int get_address(void) const { return address; };
     private:
@@ -143,4 +145,4 @@ class traces
         int address;
 };
 
-int read_file(traces ** references, char * fileName, bool verbose);
+int read_file(traces ** references, char * fileName, int verbose);

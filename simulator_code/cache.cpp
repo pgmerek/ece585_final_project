@@ -39,6 +39,24 @@ cache::~cache()
     if (Sets)
         delete [] Sets;
 }
+
+int cache::contains(entry compare_to)
+{
+    int set_index = compare_to.get_index();
+    bool match = 0;
+
+    if (Sets[set_index])   // Set isn't empty
+        match = Sets[set_index]->contains(compare_to);
+
+    if (!match)
+        ++misses;
+    else
+        ++hits;
+
+    return match;
+}
+    
+     
 /* Amanda's Section */
 // Tranisitions: All transitions for lines that that are Modified
 
@@ -74,7 +92,7 @@ cache::~cache()
 
 // This should be used every time we have a memory request for 
 // a line that is invalid 
-int cache::invalid_memory(tag_array tag, int operation)
+int cache::invalid_memory(entry tag, int operation)
 {
 	// read
 	if (operation == 0)
@@ -99,7 +117,7 @@ int cache::invalid_memory(tag_array tag, int operation)
 
 // Every time the processor snoops the L2 cache for a line 
 // that is invalid in L1, the line should remain invalid
-int cache::invalid_snoop(tag_array tag)
+int cache::invalid_snoop(entry tag)
 {
 	// This should always happen
 	if (snoop(tag.get_tag()) == false)
@@ -109,7 +127,7 @@ int cache::invalid_snoop(tag_array tag)
 }
 
 // Transition handlers for lines that are Shared
-int cache::shared_memory(tag_array tag, int operation)
+int cache::shared_memory(entry tag, int operation)
 {
 	// read
 	if (operation == 0)
@@ -121,7 +139,7 @@ int cache::shared_memory(tag_array tag, int operation)
 
 }
 
-int cache::shared_snoop(tag_array tag, int operation)
+int cache::shared_snoop(entry tag, int operation)
 {
 	// if L2 cache said to invalidate this line
 	if (operation == 3)

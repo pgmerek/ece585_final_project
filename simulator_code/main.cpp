@@ -9,11 +9,17 @@
 int main(int argc, char * argv[])
 {
     char file_name[BUFFER_SIZE];
-    bool verbose = false;
+    int verbose = false;
     int num_lines = 0;
-    int operation = -1;         // Used when processing 
-    int address = -1;           // from file to cache
+    // Used when processing file to cache
+    int operation = -1;
+    int raw_address = -1;
+    int address = -1;
+    int tag = -1;
+    int index = -1;
+    int offset = -1;
     traces * references = NULL;
+    entry temp_entry;
 
     if (argc == 3)
     {
@@ -23,7 +29,7 @@ int main(int argc, char * argv[])
     else
     {
         printf("USAGE: ./cache_simulator <name of trace file> <verbosity>\n");
-        printf("where...\n\tname of trace file is a string\n\tverbosity is either 0 for false, or 1 for true\n");
+        printf("where...\n\tname of trace file is a string\n\tverbosity is from 0 to 2 from few messages to many messages\n");
         return 0;
     }
     // Read data from file
@@ -41,16 +47,16 @@ int main(int argc, char * argv[])
     {
         operation = references[k].get_operation();
         raw_address = references[k].get_address();
-        entry(raw_address);
-        address =
-        tag = 
-        index =
-        offset = 
+        temp_entry.populate_entry(raw_address, verbose);
+        tag = temp_entry.get_tag();
+        index = temp_entry.get_index();
+        offset = temp_entry.get_offset();
         
         switch (operation)
         {
             case 0: // Read data request, sent to L1 from memory
-                data.
+                if(data.contains(temp_entry))
+                    printf("Hit\n");
                 break;
             case 1: // Write to L1 data cache, sent to L1 from memory
                 break;
@@ -86,7 +92,7 @@ int main(int argc, char * argv[])
 }
 
 
-int read_file(traces ** references, char * file_name, bool verbose)
+int read_file(traces ** references, char * file_name, int verbose)
 {
     char buffer[BUFFER_SIZE];
     int count = 0;
@@ -111,14 +117,14 @@ int read_file(traces ** references, char * file_name, bool verbose)
     in.seekg (0, ios::beg); // Return to beginning of file
     
     temp = new traces [count]; // Create a dynamic array of traces
-    if (verbose)
+    if (verbose == 2)
             printf("Reading traces from %s.\n", file_name);
 
     while (!error && k < count)
     {
         in.get(buffer, BUFFER_SIZE, '\n');  // Read each line
         in.get();   // Chills bruh
-        if (verbose)
+        if (verbose == 2)
             printf("Trace %d: ", k);
         error = temp[k++].populate(buffer, verbose);
     }

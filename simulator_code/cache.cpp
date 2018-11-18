@@ -44,12 +44,9 @@ int cache::contains(entry compare_to)
 {
     int set_index = compare_to.get_index();
     bool match = 0;
-    printf("Expected index %d.\n", set_index);
+
     if (Sets[set_index])   // Set isn't empty
-    {
-        printf("Set isn't empty.\n");
         match = Sets[set_index]->contains(compare_to);
-    }
 
     if (!match)
         ++misses;

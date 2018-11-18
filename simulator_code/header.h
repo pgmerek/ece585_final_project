@@ -79,10 +79,11 @@ class set
         ~set(void);
         int read(unsigned int tag);
         int write(entry to_add, int verbose);
-        int contains(entry compare_to) const;
+        int contains(entry compare_to);
         int is_full(void);
+        int is_empty(void);
         void evict(entry to_add, int verbose);
-        void update_lru(void);
+        void update_lru(int index);
 
     private:
         entry * all_tags;   // All lines in the set
@@ -109,6 +110,8 @@ class entry
         void set_index(int new_index) { index = new_index; };
         void set_offset(int new_offset) { offset = new_offset; };
         void set_lru(int new_lru) { lru = new_lru; };
+        void dec_lru(void);
+        void inc_lru(void);
         void set_mesi(int new_mesi) { mesi = new_mesi; };
         void set_raw_address(int new_raw_address) { raw_address = new_raw_address; };
         // Get functions
@@ -122,7 +125,7 @@ class entry
         // All others
         void evict(void);
         void copy_entry(entry to_copy, int verbose);
-        void populate_entry(int raw_address, int verbose);
+        void populate_entry(int raw_addr, int verbose);
         int compare_entries(entry to_compare) const;
 
     private:

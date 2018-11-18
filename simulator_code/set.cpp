@@ -20,6 +20,7 @@ set::set(int assoc, entry new_entry, int verbose)
     count = 0;
 	all_tags = new entry[associativity];
     all_tags[0].copy_entry(new_entry, verbose);
+    update_lru(0);  // Updated lru for the first item
 }
 
 set::~set()
@@ -36,17 +37,20 @@ set::~set()
         all_tags = NULL;
     }
 }
-int set::contains(entry compare_to) const
+int set::contains(entry compare_to)
 {
     int result = MISS;
-    printf("Beer");
     if (all_tags)
     {
         // Search for a matching entry
         for (int j = 0; j < associativity; ++j)
         {
             if (all_tags[j].compare_entries(compare_to))
+            {
                 result = HIT;
+                update_lru(j);
+                break;
+            }
         }
     }
     else
@@ -68,7 +72,10 @@ int set::write(entry to_add, int verbose)
         if (j == associativity) // Set is full
             evict(to_add, verbose);
         else
+        {
             all_tags[j].copy_entry(to_add, verbose);
+            update_lru(j);
+        }
         success = 1;
     }
     else
@@ -85,14 +92,40 @@ void set::evict(entry to_add, int verbose)
         {
             all_tags[j].evict();
             all_tags[j].copy_entry(to_add, verbose);
+            update_lru(j);
             break;
         }
     }
 }
         
-void set::update_lru()
+void set::update_lru(int entry_index)     // Index is this context is NOT the same set index. This index just tells the function where the new entry is in the set
 {
+    for (int k = 0; k < associativity; ++k)
+    {
+        if (k == entry_index)   // Set the new entry to the MRU
+        {
+            all_tags[k].set_lru(7);
+            printf("Setting lru to 7 for new entry.\n");
+        }
+        else    // Decrement all others
+            all_tags[k].dec_lru();
+    }
 }
+
 int set::is_full(void) 
 {
+   for (int j = 0; j < associativity; ++j)
+       if (all_tags[j].is_empty())
+           return 0;
+
+   return 1;
+}
+
+int set::is_empty(void) 
+{
+   for (int j = 0; j < associativity; ++j)
+       if (!all_tags[j].is_empty())
+           return 0;
+
+   return 1;
 }

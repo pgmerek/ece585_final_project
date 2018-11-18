@@ -56,6 +56,7 @@ class cache
         int shared_snoop(entry tag, int operation);
         int snoop(unsigned int tag);
         int contains(entry compare_to);
+        int write(entry to_add, int verbose);
 
     private:
         // Number of...
@@ -77,9 +78,10 @@ class set
         set(int assoc);
         ~set(void);
         int read(unsigned int tag);
+        int write(entry to_add, int verbose);
         int contains(entry compare_to) const;
         int is_full(void);
-        void read_miss_handler(unsigned int tag);
+        void evict(entry to_add, int verbose);
         void update_lru(void);
 
     private:
@@ -116,6 +118,7 @@ class entry
         int get_lru(void) const { return lru; }
         int get_mesi(void) const { return mesi; }
         int get_raw_address(void) const { return raw_address; }
+        int is_empty(void) const { return empty; }
         // All others
         void evict(void);
         void copy_entry(entry to_copy, int verbose);
@@ -123,6 +126,7 @@ class entry
         int compare_entries(entry to_compare) const;
 
     private:
+        bool empty;
         int tag;
         int index;
         int offset;

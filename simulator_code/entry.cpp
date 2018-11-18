@@ -14,6 +14,7 @@ entry::entry()
     lru = -1;
     mesi = INVALID;
     raw_address = -1;
+    empty = 1;
 }
 
 entry::~entry()
@@ -24,15 +25,18 @@ entry::~entry()
     lru = -1;
     mesi = INVALID;
     raw_address = -1;
+    empty = 1;
 }
 
 void entry::evict()
 {
     printf("Entry evicted.");
+    empty = 1;
 }
 
 int entry::compare_entries(entry to_compare) const
 {
+    printf("Comparing %x to %x.\n", raw_address, to_compare.get_raw_address());
     if (raw_address != to_compare.get_raw_address())
         return 0;
 
@@ -45,6 +49,7 @@ void entry::copy_entry(entry to_copy, int verbose)
     tag = (raw_address & MASK_FOR_TAG) >> 20;
     index = (raw_address & MASK_FOR_INDEX) >> 6;
     offset = raw_address & MASK_FOR_BYTE_OFFSET;
+    empty = 0;
     if (verbose >= 1)
         printf("Copied raw_address %x, tag %d, index %d, and offset %d.\n", raw_address, tag, index, offset);
 }
@@ -54,6 +59,7 @@ void entry::populate_entry(int raw_address, int verbose)
     tag = (raw_address & MASK_FOR_TAG) >> 20;
     index = (raw_address & MASK_FOR_INDEX) >> 6;
     offset = raw_address & MASK_FOR_BYTE_OFFSET;
+    empty = 0;
     if (verbose >= 1)
         printf("Created tag %d, index %d, and offset %d.\n", tag, index, offset);
 }

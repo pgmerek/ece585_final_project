@@ -55,8 +55,13 @@ int main(int argc, char * argv[])
         switch (operation)
         {
             case 0: // Read data request, sent to L1 from memory
-                if(data.contains(temp_entry))
+                if (data.contains(temp_entry))
                     printf("Hit\n");
+                else
+                {
+                    data.write(temp_entry, verbose);
+                    printf("Miss\n");
+                }
                 break;
             case 1: // Write to L1 data cache, sent to L1 from memory
                 break;

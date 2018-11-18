@@ -39,30 +39,53 @@ set::~set()
 int set::contains(entry compare_to) const
 {
     int result = MISS;
+    printf("Beer");
     if (all_tags)
     {
+        // Search for a matching entry
         for (int j = 0; j < associativity; ++j)
         {
             if (all_tags[j].compare_entries(compare_to))
                 result = HIT;
         }
     }
-        
+    else
+        result = -1;
+
     return result;
 }
-   
-void set::read_miss_handler(unsigned int tag)
+  
+int set::write(entry to_add, int verbose)
 {
-    if(is_full())   // Evict set if the set is full and is LRU
+    int success = 0;
+    int j = 0;
+    if (all_tags)
     {
-        for(int j = 0; j < associativity; ++j)
+        // Try to find the first empty entry
+        while (!all_tags[j].is_empty() && j < associativity)
+            ++j;
+
+        if (j == associativity) // Set is full
+            evict(to_add, verbose);
+        else
+            all_tags[j].copy_entry(to_add, verbose);
+        success = 1;
+    }
+    else
+        success = -1;
+
+    return success;
+}
+
+void set::evict(entry to_add, int verbose)
+{
+    for(int j = 0; j < associativity; ++j)
+    {
+        if(all_tags[j].get_lru() == 0)
         {
-            if(all_tags[j].get_lru() == 0)
-            {
-                all_tags[j].evict();
-                all_tags[j].set_tag(tag);
-                break;
-            }
+            all_tags[j].evict();
+            all_tags[j].copy_entry(to_add, verbose);
+            break;
         }
     }
 }

@@ -29,10 +29,6 @@ set::~set()
     count = -1;
     if (all_tags)
     {
-     /*   for (int k = 0; k < associativity; ++k)
-            if (all_tags[k])
-                delete all_tags[k];
-*/
         delete [] all_tags;
         all_tags = NULL;
     }
@@ -53,8 +49,8 @@ int set::contains(entry compare_to)
             }
         }
     }
-    else
-        result = -1;
+    else    // If our entries don't exist, return ERROR
+        result = ERROR;
 
     return result;
 }
@@ -84,20 +80,21 @@ int set::write(entry to_add, int verbose)
         }
         success = 1;
     }
-    else
-        success = -1;
+    else    // If our entries don't exist, return ERROR
+        success = ERROR;
 
     return success;
 }
 
 int set::evict(entry to_add, int verbose)
 {
+    // Search for the lru 
     for(int j = 0; j < associativity; ++j)
     {
-        if(all_tags[j].get_lru() == 0)  // Search for the lru
+        if(all_tags[j].get_lru() == 0)  // Lru is 0, mru is 7
         {
-            all_tags[j].evict();
-            all_tags[j].copy_entry(to_add, verbose);
+            all_tags[j].evict();    // Evict the lru
+            all_tags[j].copy_entry(to_add, verbose);    // Replace with new entry
             return j;
         }
     }
@@ -105,6 +102,8 @@ int set::evict(entry to_add, int verbose)
         
 void set::update_lru(int entry_index)     // Index is this context is NOT the same set index. This index just tells the function where the new entry is in the set
 {
+    // Retain old lru because we need to decrement the entries that
+    // are more recent than the one we replace. Only used if set is full
     int old_lru = all_tags[entry_index].get_lru();
     for (int k = 0; k < associativity; ++k)
     {
@@ -136,3 +135,4 @@ int set::is_empty(void)
 
    return 1;
 }
+

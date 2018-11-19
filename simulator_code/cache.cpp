@@ -63,7 +63,7 @@ int cache::write(entry to_add, int verbose)
 
     if (Sets[set_index])   // Set isn't empty
         success = Sets[set_index]->write(to_add, verbose);
-    else
+    else    // Set is empty, make a new one
         Sets[set_index] = new set(associativity, to_add, verbose);
 
     return success;

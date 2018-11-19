@@ -22,6 +22,7 @@ using namespace std;
 #define BUFFER_SIZE 256
 #define HIT 1
 #define MISS 0
+#define ERROR -1
 // Define the MESI States
 #define MODIFIED 0
 #define INVALID 1

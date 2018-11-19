@@ -36,7 +36,9 @@ void entry::evict()
 
 int entry::compare_entries(entry to_compare) const
 {
-     printf("Comparing %d to %d.\n", tag, to_compare.get_tag());
+    printf("Comparing %d to %d.\n", tag, to_compare.get_tag());
+    // Only comparing tag so that we get a hit even if the byte
+    // offset is different
     if (tag != to_compare.get_tag())
         return 0;
 
@@ -45,7 +47,9 @@ int entry::compare_entries(entry to_compare) const
 
 void entry::copy_entry(entry to_copy, int verbose)
 {
+    // Raw address contains the tag, set index, and byte offset
     raw_address = to_copy.get_raw_address();
+    // Use masks defined in header to find each field
     tag = (raw_address & MASK_FOR_TAG) >> 20;
     index = (raw_address & MASK_FOR_INDEX) >> 6;
     offset = raw_address & MASK_FOR_BYTE_OFFSET;
@@ -56,7 +60,9 @@ void entry::copy_entry(entry to_copy, int verbose)
 
 void entry::populate_entry(int raw_addr, int verbose)
 {
+    // Raw address contains the tag, set index, and byte offset
     raw_address = raw_addr;
+    // Use masks defined in header to find each field
     tag = (raw_address & MASK_FOR_TAG) >> 20;
     index = (raw_address & MASK_FOR_INDEX) >> 6;
     offset = raw_address & MASK_FOR_BYTE_OFFSET;
@@ -66,7 +72,7 @@ void entry::populate_entry(int raw_addr, int verbose)
 }
 void entry::dec_lru(void)
 {
-    if (!empty)
+    if (!empty) // Only decrement if the entry is not empty
     {
         printf("Decrementing lru from %d to %d.\n", lru, lru - 1);
         --lru; 
@@ -75,6 +81,7 @@ void entry::dec_lru(void)
 
 void entry::inc_lru(void)
 { 
-    if (!empty)
+    if (!empty) // Only decrement if the entry is not empty
         ++lru;
 }
+

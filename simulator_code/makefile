@@ -1,9 +1,8 @@
 CC = g++
 
-cache_simulator: main.o cache.o set.o entry.o traces.o
-	$(CC) -Wall -g *.cpp
-	$(CC) -o cache_simulator.out *.o
+cache_simulator: main.cpp cache.cpp set.cpp entry.cpp traces.cpp
+	$(CC) -Wall -g -o cache_simulator.out *.cpp
 
 clean:
-	rm -f *.o cache_simulator.out  
+	rm -f *.o *.out  
 

@@ -29,20 +29,20 @@ cache::~cache()
     writes = 0;
     operations = 0;
     associativity = 0;
-    // Delete each set
-	for (int i = 0; i < NUM_SETS; ++i)
-    {
-        if (Sets[i])
-        {
-            delete Sets[i];
-            Sets[i] = NULL;
-        }
-    }
     // Delete the array of sets
     if (Sets)
     {
-        delete [] Sets;
-        Sets = NULL;
+    // Delete each set
+        for (int i = 0; i < NUM_SETS; ++i)
+        {
+            if (Sets[i])
+            {
+                delete Sets[i];
+                Sets[i] = NULL;
+            }
+        }
+    delete [] Sets;
+    Sets = NULL;
     }
 }
 
@@ -119,22 +119,23 @@ int cache::write(entry to_add, int verbose)
 int cache::clear(int verbose)
 {
     reset_stats(verbose);
-    // Delete each set
-    for (int i = 0; i < NUM_SETS; ++i)
-    {
-        if (Sets[i])
-        {
-            delete Sets[i];
-            Sets[i] = NULL;
-        }
-    }
-    if (verbose == 2)
-        printf("sets cleared");
     // Delete the array of sets
     if (Sets)
     {
-        delete [] Sets;
-        Sets = NULL;
+    // Delete each set
+        for (int i = 0; i < NUM_SETS; ++i)
+        {
+            if (Sets[i])
+            {
+                delete Sets[i];
+                Sets[i] = NULL;
+            }
+        }
+    if (verbose == 2)
+        printf("sets cleared");
+
+    delete [] Sets;
+    Sets = NULL;
     }
     return 1;
 }

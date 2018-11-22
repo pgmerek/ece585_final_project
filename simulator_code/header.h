@@ -52,6 +52,9 @@ class cache
         int get_misses() const { return misses; }
         int reset_stats(int verbose);
         float get_hit_miss_ratio() const;
+        // Set functions
+        void increment_reads(void) { ++reads; };
+        void increment_writes(void) { ++writes; };
         // All others
         int invalid_memory(entry tag, int operation);
         int invalid_snoop(entry tag);
@@ -70,7 +73,6 @@ class cache
         int misses;
         int reads;
         int writes;
-        int operations;
         // Cache parameters
         int associativity;
         // Pointer to the sets in the cache

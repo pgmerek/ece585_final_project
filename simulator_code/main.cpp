@@ -55,6 +55,7 @@ int main(int argc, char * argv[])
         switch (operation)
         {
             case 0: // Read data request, sent to L1 from memory
+                data.increment_reads();
                 if (data.contains(temp_entry, verbose))
                     printf("Hit\n");
                 else
@@ -62,12 +63,32 @@ int main(int argc, char * argv[])
                     data.write(temp_entry, verbose);
                     printf("Miss\n");
                 }
+                // Update MESI
                 break;
             case 1: // Write to L1 data cache, sent to L1 from memory
+                data.increment_writes();
+                if (data.contains(temp_entry, verbose))
+                    printf("Hit\n");
+                else
+                {
+                    data.write(temp_entry, verbose);
+                    printf("Miss\n");
+                }
+                // Update MESI
                 break;
             case 2: // Read from instruction cache
+                instruction.increment_reads();
+                if (instruction.contains(temp_entry, verbose))
+                    printf("Hit\n");
+                else
+                {
+                    instruction.write(temp_entry, verbose);
+                    printf("Miss\n");
+                }
+                // Update MESI
                 break;
             case 3: // Invalidate from L2
+                // request to change another line to invalid from another cache
                 break;
             case 4: // Data request from L2
                 break;
@@ -90,6 +111,8 @@ int main(int argc, char * argv[])
         }
     }
     
+    if (references)
+        delete [] references;
     return 1;
 }
 

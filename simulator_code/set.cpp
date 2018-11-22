@@ -33,7 +33,7 @@ set::~set()
         all_tags = NULL;
     }
 }
-int set::contains(entry compare_to)
+int set::contains(entry compare_to, int verbose)
 {
     int result = MISS;
     if (all_tags)
@@ -41,7 +41,7 @@ int set::contains(entry compare_to)
         // Search for a matching entry
         for (int j = 0; j < associativity; ++j)
         {
-            if (all_tags[j].compare_entries(compare_to))
+            if (all_tags[j].compare_entries(compare_to, verbose))
             {
                 result = HIT;
                 update_lru(j);
@@ -93,7 +93,7 @@ int set::evict(entry to_add, int verbose)
     {
         if(all_tags[j].get_lru() == 0)  // Lru is 0, mru is 7
         {
-            all_tags[j].evict();    // Evict the lru
+            all_tags[j].evict(verbose);    // Evict the lru
             all_tags[j].copy_entry(to_add, verbose);    // Replace with new entry
             return j;
         }

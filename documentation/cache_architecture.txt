@@ -1,12 +1,9 @@
 Emma Smith 
-Last Updated 04 November 2018
+Last Updated 20 November 2018
 
 The project description says that this cache will run on a 32-bit processor, so there will be 32 address bits total. 
 Both the instruction and the data caches are the same size, so they can both use the same address and tag bits, but we will 
 need to use one of the tag bits to indicate whether we are addressing the data or the instruction cache.
-
-I'm not sure if each cache is supposed to have its own 32-bit address or if they should share a 32-bit address, so I am defining the 
-addressing separately.
 
 The instruction cache will have the following
  -16K sets
@@ -15,8 +12,8 @@ The instruction cache will have the following
  -Capacity = 4MB
  
  Addressing bits per line
- -14 index bits (1 bit for each set)
- -6 byte index bits (1 bit for each byte in a line)
+ -14 index bits (1 address for each set)
+ -6 byte index bits (1 address for each byte in a line)
  -12 bits for the tag
  
  Tag Array
@@ -32,8 +29,8 @@ The data cache will have the following
  -Capacity = 8MB
  
  Addressing bits per line
- -14 index bits (1 bit for each set)
- -6 byte index bits (1 bit for each byte in a line)
+ -14 index bits (1 address for each set)
+ -6 byte index bits (1 address for each byte in a line)
  -12 bits for the tag
  
  Tag Array
@@ -41,3 +38,5 @@ The data cache will have the following
  -16 bits per set for the MESI
  -96 tag bits per set
  -Size for tag array for entire instruction cache is: 272KB (kilobytes)
+
+Addresses will be shared between the instruction and the data caches

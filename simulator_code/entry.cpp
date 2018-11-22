@@ -47,6 +47,40 @@ int entry::compare_entries(entry to_compare, int verbose) const
     return 1;
 }
 
+
+// This is is the invalidate for snoop 
+int entry::invalidate_snoop(int verbose)
+{
+    int increment_hits = 0;
+    // Invalidating is different for each current mesi state
+    switch (mesi)
+    {
+        case MODIFIED:  // Increment hits and writeback to L2
+            mesi = INVALID;
+            increment_hits = 1;
+            if (verbose)
+                printf("%x has been changed from modified to invalid.\n", raw_address);
+            //printf("Writing %x back to L2 cache and invalidating entry in L1.\n", raw_address);
+            break;
+        case INVALID:   // Do nothing
+            if (verbose)
+                printf("%x has been changed from invalid to invalid.\n", raw_address);
+            break;
+        case SHARED:    // Invalidate, but don't increment hits or writes
+            mesi = INVALID;
+            if (verbose)
+                printf("%x has been changed from shared to invalid.\n", raw_address);
+            break;
+        case EXCLUSIVE: // Invalidate, but don't increment hits or writes
+            mesi = INVALID;
+            if (verbose)
+                printf("%x has been changed from exclusive to invalid.\n", raw_address);
+            break;
+    }
+
+    return increment_hits;
+}
+
 void entry::copy_entry(entry to_copy, int verbose)
 {
     // Raw address contains the tag, set index, and byte offset

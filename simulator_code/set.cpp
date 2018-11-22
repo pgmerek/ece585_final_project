@@ -23,6 +23,16 @@ set::set(int assoc, entry new_entry, int verbose)
     update_lru(0);  // Updated lru for the first item
 }
 
+set::set(int assoc, entry new_entry, int new_mesi, int verbose)
+{
+    associativity = assoc;
+    count = 0;
+	all_tags = new entry[associativity];
+    all_tags[0].copy_entry(new_entry, verbose);
+    all_tags[0].set_mesi(new_mesi);
+    update_lru(0);  // Updated lru for the first item
+}
+
 set::~set()
 {
     associativity = -1;
@@ -86,6 +96,39 @@ int set::write(entry to_add, int verbose)
     return success;
 }
 
+int set::write(entry to_add, int new_mesi, int verbose)
+{
+    int success = 0;
+    int j = 0;
+    int lru_index = -1; // If the set is full, this is where we should write the new entry
+    if (all_tags)
+    {
+        // Try to find the first empty entry
+        while (!all_tags[j].is_empty() && j < associativity)
+            ++j;
+
+        if (j == associativity - 1) // Set is full
+        {
+            printf("Set full in write operation. Evicting the lru.\n");
+            lru_index = evict(to_add, verbose);
+            all_tags[lru_index].set_mesi(new_mesi);
+            update_lru(lru_index);
+        }
+        else    // Set isn't full
+        {
+            printf("Set isn't full in write operation.\n");
+            all_tags[j].copy_entry(to_add, verbose);
+            all_tags[j].set_mesi(new_mesi);
+            update_lru(j);
+        }
+        success = 1;
+    }
+    else    // If our entries don't exist, return ERROR
+        success = ERROR;
+
+    return success;
+}
+
 int set::evict(entry to_add, int verbose)
 {
     // Search for the lru 
@@ -134,5 +177,25 @@ int set::is_empty(void)
            return 0;
 
    return 1;
+}
+
+int set::invalidate_snoop(entry to_invalidate, int verbose)
+{
+    int result = ERROR;
+    if (all_tags)
+    {
+        // Search for a matching entry
+        for (int j = 0; j < associativity; ++j)
+        {
+            if (all_tags[j].compare_entries(to_invalidate, verbose))
+            {
+                result = all_tags[j].invalidate_snoop(verbose);
+                //update_lru(j);  // What happens to lru when invalidating entry?
+                break;
+            }
+        }
+    }
+
+    return result;
 }
 

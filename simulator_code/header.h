@@ -58,15 +58,15 @@ class cache
         void increment_hits(void) { ++hits; };
         void increment_misses(void) { ++misses; };
         // All others
-        int invalid_memory(entry tag, int operation);
-        int invalid_entry(entry to_invalidate, int verbose);
-        int invalid_snoop(entry tag);
+        int invalidate_snoop(entry to_invalidate, int verbose);
+        int invalidate_memory(entry to_invalidate, int operation, int verbose);
         int shared_memory(entry tag, int operation);
         int shared_snoop(entry tag, int operation);
         int modified_memory(entry tag, int operation);
-        int snoop(unsigned int tag);
+        int snoop(unsigned int tag) const;
         int contains(entry compare_to, int verbose);
         int write(entry to_add, int verbose);
+        int write(entry to_add, int new_mesi, int verbose);
         int clear (int verbose);
         void print_contents(void) const;
 
@@ -86,14 +86,19 @@ class set
 {
     public:
         set(int assoc, entry new_entry, int verbose);
+        set(int assoc, entry new_entry, int new_mesi, int verbose);
         set(int assoc);
         ~set(void);
-        int read(unsigned int tag);
-        int write(entry to_add, int verbose);
-        int contains(entry compare_to, int verbose);
+        // Get functions
         int is_full(void);
         int is_empty(void);
+        // Other functions
+        int read(unsigned int tag);
+        int write(entry to_add, int verbose);
+        int write(entry to_add, int new_mesi, int verbose);
+        int contains(entry compare_to, int verbose);
         int evict(entry to_add, int verbose);
+        int invalidate_snoop(entry to_invalidate, int verbose);
         void update_lru(int index);
 
     private:
@@ -130,6 +135,7 @@ class entry
         void copy_entry(entry to_copy, int verbose);
         void populate_entry(int raw_addr, int verbose);
         int compare_entries(entry to_compare, int verbose) const;
+        int invalidate_snoop(int verbose);
 
     private:
         bool empty;

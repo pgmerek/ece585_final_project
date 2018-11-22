@@ -79,6 +79,19 @@ int cache::write(entry to_add, int verbose)
     return success;
 }
 
+int cache::write(entry to_add, int new_mesi, int verbose)
+{
+    int set_index = to_add.get_index();
+    int success = 0; 
+
+    if (Sets[set_index])   // Set isn't empty
+        success = Sets[set_index]->write(to_add, new_mesi, verbose);
+    else    // Set is empty, make a new one
+        Sets[set_index] = new set(associativity,to_add, new_mesi, verbose);
+
+    return success;
+}
+
 int cache::clear(int verbose)
 {
     reset_stats(verbose);
@@ -115,6 +128,19 @@ int cache::reset_stats(int verbose)
     return 1;
 }
 
+int cache::invalidate_snoop(entry to_invalidate, int verbose)
+{
+    int set_index = to_invalidate.get_index();
+    int success = ERROR;
+    
+    if (Sets)
+    {
+        if (Sets[set_index])   // Set isn't empty
+            success = Sets[set_index]->invalidate_snoop(to_invalidate, verbose);
+    }
+
+    return success;
+}
 
 // Transition handlers for invalid lines
 // These were numbers 1, 4, and 7 for the controller accessing memory
@@ -122,38 +148,30 @@ int cache::reset_stats(int verbose)
 
 // This should be used every time we have a memory request for 
 // a line that is invalid 
-int cache::invalid_memory(entry tag, int operation)
-{
-	// read
-	if (operation == 0)
-	{
-		
-		// This should never happen
-		if (snoop(tag.get_tag())== true)
-			tag.set_mesi(SHARED);
-		else 
-			// should have message that says "reading from memory..."
-			tag.set_mesi(EXCLUSIVE);
-	}
-	//write
-	else if (operation == 1)
-	{
-		//should have message that says "RFO L2 <address>
-		tag.set_mesi(MODIFIED);
-	}
 
-	return 1;
-}
-
-// Every time the processor snoops the L2 cache for a line 
-// that is invalid in L1, the line should remain invalid
-int cache::invalid_snoop(entry tag)
+int cache::invalidate_memory(entry to_invalidate, int operation, int verbose)
 {
-	// This should always happen
-	if (snoop(tag.get_tag()) == false)
-	    tag.set_mesi(INVALID);
-	return 1;
-	
+    int success = false;
+    int tag = to_invalidate.get_tag();
+    switch (operation)
+    {
+        case 0: // Read
+            // Check if tag is in other caches (this should never happen)
+            if (snoop(tag))
+            {
+                if (verbose)
+                    printf("Found entry in other cache, setting mesi to SHARED. This should never happen.\n");
+                to_invalidate.set_mesi(SHARED);
+            }
+            else    // Requested is not in other caches, write as exclusive
+                success = write(to_invalidate, EXCLUSIVE, verbose);
+            break;
+        case 1: // Write
+            // Need meat here
+            break;
+    }
+
+	return success;
 }
 
 // Transition handlers for lines that are Shared
@@ -186,7 +204,7 @@ int cache::shared_snoop(entry tag, int operation)
 // cache is not in the L2 cache
 // We will execute this every time we have a miss in the 
 // L1 cache
-int cache::snoop(unsigned int tag)
+int cache::snoop(unsigned int tag) const
 {
 	return false;
 }

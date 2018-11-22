@@ -12,47 +12,64 @@ cache::cache(int assoc)
 	reads = 0;
 	writes = 0;
 	operations = 0;
-    associativity = assoc;
+	associativity = assoc;
 	//create sets of empty lines
 	Sets = new set * [NUM_SETS];
 	//Set each set to NULL
 	for (int i = 0; i < NUM_SETS; ++i)
 		Sets[i] = NULL;
-	
+
 }
 
 cache::~cache()
 {
-    hits = -1;
-    misses = -1;
-    reads = -1;
-    writes = -1;
-    operations = -1;
-    associativity = -1;
+    hits = 0;
+    misses = 0;
+    reads = 0;
+    writes = 0;
+    operations = 0;
+    associativity = 0;
     // Delete each set
 	for (int i = 0; i < NUM_SETS; ++i)
     {
         if (Sets[i])
+        {
             delete Sets[i];
+            Sets[i] = NULL;
+        }
     }
     // Delete the array of sets
     if (Sets)
+    {
         delete [] Sets;
+        Sets = NULL;
+    }
 }
 
 int cache::contains(entry compare_to)
 {
     int set_index = compare_to.get_index();
     bool match = 0;
+    
+    if (Sets)
+    {
 
-    if (Sets[set_index])   // Set isn't empty
-        match = Sets[set_index]->contains(compare_to);
+        if (Sets[set_index])   // Set isn't empty
+            match = Sets[set_index]->contains(compare_to);
 
-    if (!match)
-        ++misses;
+        if (!match)
+            ++misses;
+        else
+            ++hits;
+    }
     else
-        ++hits;
-
+    {
+        //create sets of empty lines
+        Sets = new set * [NUM_SETS];
+        //Set each set to NULL
+        for (int i = 0; i < NUM_SETS; ++i)
+            Sets[i] = NULL;
+    }
     return match;
 }
    
@@ -99,6 +116,44 @@ int cache::write(entry to_add, int verbose)
 /* End of Patrick's section */
 
 /* Emma's section */
+int cache::clear(int verbose)
+{
+    reset_stats(verbose);
+    // Delete each set
+    for (int i = 0; i < NUM_SETS; ++i)
+    {
+        if (Sets[i])
+        {
+            delete Sets[i];
+            Sets[i] = NULL;
+        }
+    }
+    if (verbose == 2)
+        printf("sets cleared");
+    // Delete the array of sets
+    if (Sets)
+    {
+        delete [] Sets;
+        Sets = NULL;
+    }
+    return 1;
+}
+
+
+int cache::reset_stats(int verbose)
+{	
+    hits = 0;
+    misses = 0;
+    reads = 0;
+    writes = 0;
+    operations = 0;
+
+    if (verbose == 2)
+	    printf("The cache has been cleared.\nHits:%d\nMisses:%d\nReads:%d\nWrites:%d\n", hits, misses, reads, writes);
+    return 1;
+}
+
+
 // Transition handlers for invalid lines
 // These were numbers 1, 4, and 7 for the controller accessing memory
 // Transition 1 for snoop
@@ -149,6 +204,7 @@ int cache::shared_memory(entry tag, int operation)
 	// also need to send a write command to the L2 cache
 	else if (operation == 1)
 		tag.set_tag(MODIFIED);
+	return 1;
 
 }
 
@@ -160,6 +216,7 @@ int cache::shared_snoop(entry tag, int operation)
 	// if L2 is reading a line that is already shared
 	else if (operation == 4)
 		tag.set_tag(SHARED);
+	return 1;
 }
 // Every time we snoop to L2, it will always 
 // come back false because for this project

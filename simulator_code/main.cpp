@@ -71,16 +71,10 @@ int main(int argc, char * argv[])
                 break;
             case 4: // Data request from L2
                 break;
-            case 5: // Invalid
-                printf("Operation invalid. %d is not a valid operation. Exiting....\n", operation);
-                return -1;
-            case 6: // Invalid
-                printf("Operation invalid. %d is not a valid operation. Exiting....\n", operation);
-                return -1;
-            case 7: // Invalid
-                printf("Operation invalid. %d is not a valid operation. Exiting....\n", operation);
                 return -1;
             case 8: // Clear cache and reset all statistics
+                data.clear(verbose);
+                instruction.clear(verbose);   
                 break;
             case 9: // Print contents and state of the cache
                 break;
@@ -90,9 +84,6 @@ int main(int argc, char * argv[])
         }
     }
     
-    // Print hit rate, miss rate, ratio of hits to misses, read operations, write operations, and all operations
-
-        
     return 1;
 }
 

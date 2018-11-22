@@ -49,15 +49,17 @@ class cache
         int get_writes() const { return writes; }
         int get_hits() const { return hits; }
         int get_misses() const { return misses; }
-        int reset_stats();
-        float hit_miss_ratio() const;
+        int reset_stats(int verbose);
+        float hit_miss_ratio() const {return hits / misses; }
         int invalid_memory(entry tag, int operation);
         int invalid_snoop(entry tag);
         int shared_memory(entry tag, int operation);
         int shared_snoop(entry tag, int operation);
+        int modified_memory(entry tag, int operation);
         int snoop(unsigned int tag);
         int contains(entry compare_to);
         int write(entry to_add, int verbose);
+	int clear (int verbose);
 
     private:
         // Number of...

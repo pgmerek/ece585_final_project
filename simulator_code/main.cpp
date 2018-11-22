@@ -73,11 +73,16 @@ int main(int argc, char * argv[])
                 break;
                 return -1;
             case 8: // Clear cache and reset all statistics
+                printf("Clearing data cache.....");
                 data.clear(verbose);
+                printf("Clearing instruction cache....");
                 instruction.clear(verbose);   
                 break;
-            case 9: // Print contents and state of the cache
+            case 9: // Print contents and state of the cache :w
+                printf("----Data Cache Statistics----");
                 data.print_contents();
+                printf("----Instruction Cache Statistics----");
+                instruction.print_contents();
                 break;
             default:
                 printf("Operation invalid. %d is not a valid operation. Exiting....\n", operation);

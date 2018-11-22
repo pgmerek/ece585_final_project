@@ -201,7 +201,8 @@ int cache::snoop(unsigned int tag)
 
 void cache::print_contents() const
 {
-    printf("Currently, of the %d operations that have occured, %d have been hits and %d have been misses.\n", hits + misses, hits, misses);
+    printf("Currently, of the %d operations that have occurred, %d have been hits and %d have been misses.\n", hits + misses, hits, misses);
+    printf("Currently, of the %d operations that have occurred, %d have been reads and %d have been writes.\n", reads + writes, reads, writes); 
     printf("This represents a hit-miss ratio of %f.\n", get_hit_miss_ratio());
 }
 

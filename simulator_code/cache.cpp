@@ -54,11 +54,6 @@ int cache::contains(entry compare_to, int verbose)
 
         if (Sets[set_index])   // Set isn't empty
             match = Sets[set_index]->contains(compare_to, verbose);
-
-        if (!match)
-            ++misses;
-        else
-            ++hits;
     }
     else
     {

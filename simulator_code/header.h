@@ -55,8 +55,11 @@ class cache
         // Set functions
         void increment_reads(void) { ++reads; };
         void increment_writes(void) { ++writes; };
+        void increment_hits(void) { ++hits; };
+        void increment_misses(void) { ++misses; };
         // All others
         int invalid_memory(entry tag, int operation);
+        int invalid_entry(entry to_invalidate, int verbose);
         int invalid_snoop(entry tag);
         int shared_memory(entry tag, int operation);
         int shared_snoop(entry tag, int operation);

@@ -57,9 +57,13 @@ int main(int argc, char * argv[])
             case 0: // Read data request, sent to L1 from memory
                 data.increment_reads();
                 if (data.contains(temp_entry, verbose))
+                {
+                    data.increment_hits();
                     printf("Hit\n");
+                }
                 else
                 {
+                    data.increment_misses();
                     data.write(temp_entry, verbose);
                     printf("Miss\n");
                 }
@@ -68,9 +72,13 @@ int main(int argc, char * argv[])
             case 1: // Write to L1 data cache, sent to L1 from memory
                 data.increment_writes();
                 if (data.contains(temp_entry, verbose))
+                {
+                    data.increment_hits();
                     printf("Hit\n");
+                }
                 else
                 {
+                    data.increment_misses();
                     data.write(temp_entry, verbose);
                     printf("Miss\n");
                 }
@@ -79,9 +87,13 @@ int main(int argc, char * argv[])
             case 2: // Read from instruction cache
                 instruction.increment_reads();
                 if (instruction.contains(temp_entry, verbose))
+                {
+                    instruction.increment_hits();
                     printf("Hit\n");
+                }
                 else
                 {
+                    instruction.increment_misses();
                     instruction.write(temp_entry, verbose);
                     printf("Miss\n");
                 }
@@ -89,6 +101,15 @@ int main(int argc, char * argv[])
                 break;
             case 3: // Invalidate from L2
                 // request to change another line to invalid from another cache
+                // Need to search for an entry in the cache. if found, invalidate it.
+                // Refer to snoop diagram for logic on updating hits/misses and writing back to L2 (just a print statement)
+                if (data.contains(temp_entry, verbose))
+                {
+                    data.invalidate_entry(temp_entry, verbose);
+                }
+                else
+                    printf("Entry not invalidated since it wasn't found in the cache.\n");
+                
                 break;
             case 4: // Data request from L2
                 break;

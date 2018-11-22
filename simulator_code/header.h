@@ -45,21 +45,24 @@ class cache
     public:
         cache(int assoc);
         ~cache();
+        // Get functions
         int get_reads() const { return reads; } 
         int get_writes() const { return writes; }
         int get_hits() const { return hits; }
         int get_misses() const { return misses; }
         int reset_stats(int verbose);
-        float hit_miss_ratio() const {return hits / misses; }
+        float get_hit_miss_ratio() const;
+        // All others
         int invalid_memory(entry tag, int operation);
         int invalid_snoop(entry tag);
         int shared_memory(entry tag, int operation);
         int shared_snoop(entry tag, int operation);
         int modified_memory(entry tag, int operation);
         int snoop(unsigned int tag);
-        int contains(entry compare_to);
+        int contains(entry compare_to, int verbose);
         int write(entry to_add, int verbose);
-	int clear (int verbose);
+        int clear (int verbose);
+        void print_contents(void) const;
 
     private:
         // Number of...
@@ -82,7 +85,7 @@ class set
         ~set(void);
         int read(unsigned int tag);
         int write(entry to_add, int verbose);
-        int contains(entry compare_to);
+        int contains(entry compare_to, int verbose);
         int is_full(void);
         int is_empty(void);
         int evict(entry to_add, int verbose);
@@ -92,14 +95,6 @@ class set
         entry * all_tags;   // All lines in the set
         int count;
         int associativity;
-        /*unsigned int index;
-        unsigned int address_bits;
-        unsigned int index_bits;
-        unsigned int offset_bits;*/
-        // Private functions
-        void read_miss_handler(void);
-        
-
 };
 
 // Object for tag array/entry/line
@@ -126,10 +121,10 @@ class entry
         int get_raw_address(void) const { return raw_address; }
         int is_empty(void) const { return empty; }
         // All others
-        void evict(void);
+        void evict(int verbose);
         void copy_entry(entry to_copy, int verbose);
         void populate_entry(int raw_addr, int verbose);
-        int compare_entries(entry to_compare) const;
+        int compare_entries(entry to_compare, int verbose) const;
 
     private:
         bool empty;
@@ -151,7 +146,7 @@ class traces
         int get_address(void) const { return address; };
     private:
         int operation;
-        bool has_address;   // False for operations 8 and 9, true otherwise
+        bool has_address;   // False for when operation equal 8 or 9, true otherwise
         int address;
 };
 

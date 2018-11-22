@@ -28,15 +28,17 @@ entry::~entry()
     empty = 1;
 }
 
-void entry::evict()
+void entry::evict(int verbose)
 {
-    printf("Entry evicted.\n");
+    if (verbose)
+        printf("Entry evicted.\n");
     empty = 1;
 }
 
-int entry::compare_entries(entry to_compare) const
+int entry::compare_entries(entry to_compare, int verbose) const
 {
-    printf("Comparing %d to %d.\n", tag, to_compare.get_tag());
+    if (verbose)
+        printf("Comparing %d to %d.\n", tag, to_compare.get_tag());
     // Only comparing tag so that we get a hit even if the byte
     // offset is different
     if (tag != to_compare.get_tag())

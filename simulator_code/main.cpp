@@ -55,7 +55,7 @@ int main(int argc, char * argv[])
         switch (operation)
         {
             case 0: // Read data request, sent to L1 from memory
-                if (data.contains(temp_entry))
+                if (data.contains(temp_entry, verbose))
                     printf("Hit\n");
                 else
                 {
@@ -77,6 +77,7 @@ int main(int argc, char * argv[])
                 instruction.clear(verbose);   
                 break;
             case 9: // Print contents and state of the cache
+                data.print_contents();
                 break;
             default:
                 printf("Operation invalid. %d is not a valid operation. Exiting....\n", operation);

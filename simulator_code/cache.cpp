@@ -46,7 +46,7 @@ cache::~cache()
     }
 }
 
-int cache::contains(entry compare_to)
+int cache::contains(entry compare_to, int verbose)
 {
     int set_index = compare_to.get_index();
     bool match = 0;
@@ -55,7 +55,7 @@ int cache::contains(entry compare_to)
     {
 
         if (Sets[set_index])   // Set isn't empty
-            match = Sets[set_index]->contains(compare_to);
+            match = Sets[set_index]->contains(compare_to, verbose);
 
         if (!match)
             ++misses;
@@ -86,36 +86,6 @@ int cache::write(entry to_add, int verbose)
     return success;
 }
 
-     
-/* Amanda's Section */
-// Tranisitions: All transitions for lines that that are Modified
-
-
-
-
-
-
-
-/* End of Amanda's Section */
-
-/* Patrick's section */
-// Transisition All transitions for lines that are at Exclusive
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* End of Patrick's section */
-
-/* Emma's section */
 int cache::clear(int verbose)
 {
     reset_stats(verbose);
@@ -132,14 +102,13 @@ int cache::clear(int verbose)
             }
         }
     if (verbose == 2)
-        printf("sets cleared");
+        printf("Sets Cleared.\n");
 
     delete [] Sets;
     Sets = NULL;
     }
     return 1;
 }
-
 
 int cache::reset_stats(int verbose)
 {	
@@ -150,7 +119,7 @@ int cache::reset_stats(int verbose)
     operations = 0;
 
     if (verbose == 2)
-	    printf("The cache has been cleared.\nHits:%d\nMisses:%d\nReads:%d\nWrites:%d\n", hits, misses, reads, writes);
+	    printf("The cache has been cleared; Hits:%d Misses:%d Reads:%d Writes:%d\n", hits, misses, reads, writes);
     return 1;
 }
 
@@ -230,9 +199,19 @@ int cache::snoop(unsigned int tag)
 	return false;
 }
 
+void cache::print_contents() const
+{
+    printf("Currently, of the %d operations that have occured, %d have been hits and %d have been misses.\n", hits + misses, hits, misses);
+    printf("This represents a hit-miss ratio of %f.\n", get_hit_miss_ratio());
+}
 
-
-
-
-
-/* End of Emma's section */
+float cache::get_hit_miss_ratio() const
+{
+    // Convert to float
+    float h = hits;
+    float m = misses;
+    if (!misses)    // Make sure we don't divide by zero
+        return 0;
+    
+    return h / m;
+}

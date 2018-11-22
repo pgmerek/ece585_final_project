@@ -56,6 +56,7 @@ void entry::copy_entry(entry to_copy, int verbose)
     index = (raw_address & MASK_FOR_INDEX) >> 6;
     offset = raw_address & MASK_FOR_BYTE_OFFSET;
     empty = 0;
+    mesi = INVALID;
     if (verbose >= 1)
         printf("Copied raw_address %x, tag %d, index %d, and offset %d.\n", raw_address, tag, index, offset);
 }
@@ -69,6 +70,7 @@ void entry::populate_entry(int raw_addr, int verbose)
     index = (raw_address & MASK_FOR_INDEX) >> 6;
     offset = raw_address & MASK_FOR_BYTE_OFFSET;
     empty = 0;
+    mesi = INVALID;
     if (verbose >= 1)
         printf("Created tag %d, index %d, and offset %d.\n", tag, index, offset);
 }

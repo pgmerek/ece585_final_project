@@ -11,7 +11,6 @@ cache::cache(int assoc)
 	misses = 0;
 	reads = 0;
 	writes = 0;
-	operations = 0;
 	associativity = assoc;
 	//create sets of empty lines
 	Sets = new set * [NUM_SETS];
@@ -27,7 +26,6 @@ cache::~cache()
     misses = 0;
     reads = 0;
     writes = 0;
-    operations = 0;
     associativity = 0;
     // Delete the array of sets
     if (Sets)
@@ -116,7 +114,6 @@ int cache::reset_stats(int verbose)
     misses = 0;
     reads = 0;
     writes = 0;
-    operations = 0;
 
     if (verbose == 2)
 	    printf("The cache has been cleared; Hits:%d Misses:%d Reads:%d Writes:%d\n", hits, misses, reads, writes);

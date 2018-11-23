@@ -92,6 +92,7 @@ int main(int argc, char * argv[])
                     else
                         printf("Miss\n");
                 }
+                // Might need to invalid copy in L2 if write miss and entry is shared
                 break;
             case 2: // Read from instruction cache
                 if (verbose == 2)
@@ -114,7 +115,6 @@ int main(int argc, char * argv[])
             case 3: // Invalidate from L2
                 if (verbose == 2)
                     printf("Invalidate from L2 request.=======\n");
-                // request to change another line to invalid from another cache
                 // Need to search for an entry in the cache. if found, invalidate it.
                 // Refer to snoop diagram for logic on updating hits/misses and writing back to L2 (just a print statement)
                 if (data.contains(temp_entry, verbose)) // Make sure the thing we want to invalid is there

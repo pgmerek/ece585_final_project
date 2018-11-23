@@ -120,7 +120,7 @@ int set::write(entry to_add, int new_mesi, int verbose)
 {
     int success = 0;
     int index_to_insert = 0;
-    int lru_index = -1; // If the set is full, this is where we should write the new entry
+    int lru_index = 0; // If the set is full, this is where we should write the new entry
     if (all_tags)
     {
         // Try to find the first empty entry
@@ -130,15 +130,19 @@ int set::write(entry to_add, int new_mesi, int verbose)
         if (index_to_insert == associativity) // Set is full
         {
             if (verbose == 2)
-                printf("Set full. Evicting the lru and writing %x.\n", index_to_insert, to_add.get_raw_address());
+                printf("Set full. Evicting the lru and writing %x.\n", to_add.get_raw_address());
             lru_index = evict();    // Find which entry to evict
-            
-            if (all_tags[lru_index])    // Delete the lru
+            if (lru_index != ERROR)
             {
-                delete all_tags[lru_index];
-                all_tags[lru_index] = NULL;
+                if (all_tags[lru_index])    // Delete the lru
+                {
+                    delete all_tags[lru_index];
+                    all_tags[lru_index] = NULL;
+                }
+                index_to_insert = lru_index;    // We need to write location of the entry we evicted
             }
-            index_to_insert = lru_index;    // We need to write location of the entry we evicted
+            else
+                printf("Was not able to find lru in when attempting to evict entry. The lru was likely not set correctly.\n");
         }
         else
         {
@@ -149,7 +153,8 @@ int set::write(entry to_add, int new_mesi, int verbose)
         all_tags[index_to_insert] = new entry(to_add, verbose);
         all_tags[index_to_insert]->set_mesi(new_mesi);
         update_lru(index_to_insert, verbose);
-        success = 1;
+        if (lru_index != ERROR)
+            success = 1;
     }
 
     return success;
@@ -161,6 +166,8 @@ int set::evict()
     for(int j = 0; j < associativity; ++j)
         if(all_tags[j] && all_tags[j]->get_lru() == 0)  // Lru is 0, mru is 7
             return j;
+    // If not found, return error 
+    return ERROR;
 }
         
 void set::update_lru(int entry_index, int verbose)     // Index is this context is NOT the same set index. This index just tells the function where the new entry is in the set
@@ -214,7 +221,7 @@ int set::invalidate_snoop(entry to_invalidate, int verbose)
             if (all_tags[j]->compare_entries(to_invalidate, verbose))
             {
                 result = all_tags[j]->invalidate_snoop(verbose);
-                //update_lru(j);  // What happens to lru when invalidating entry?
+                update_lru(j, verbose);
                 break;
             }
         }

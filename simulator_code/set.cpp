@@ -181,7 +181,7 @@ void set::update_lru(int entry_index, int verbose)     // Index is this context 
         {
             all_tags[k]->set_lru(7);
             if (verbose == 2)
-                printf("Setting lru to 7 for new entry.\n");
+                printf("Setting lru of %x to 7.\n", all_tags[entry_index]->get_raw_address());
         }
         // Decrement all other that were newer than the previous entry
         else
@@ -218,7 +218,7 @@ int set::invalidate_snoop(entry to_invalidate, int verbose)
         // Search for a matching entry
         for (int j = 0; j < associativity; ++j)
         {
-            if (all_tags[j]->compare_entries(to_invalidate, verbose))
+            if (all_tags[j] && all_tags[j]->compare_entries(to_invalidate, verbose))
             {
                 result = all_tags[j]->invalidate_snoop(verbose);
                 update_lru(j, verbose);

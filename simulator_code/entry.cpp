@@ -120,7 +120,7 @@ void entry::dec_lru(int verbose)
     if (!empty) // Only decrement if the entry is not empty
     {
         if (verbose == 2)
-            printf("Decrementing lru from %d to %d.\n", lru, lru - 1);
+            printf("Decrementing lru of %x from %d to %d.\n", raw_address, lru, lru - 1);
         --lru; 
     }
 }

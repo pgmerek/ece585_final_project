@@ -229,4 +229,15 @@ int set::invalidate_snoop(entry to_invalidate, int verbose)
 
     return result;
 }
+void set::print_all_entries(void) const
+{
+    if (all_tags)
+    {
+        for (int j = 0; j < associativity; ++j)
+        {
+            if (all_tags[j])
+                all_tags[j]->print_entry();
+        }
+    }
+}
 

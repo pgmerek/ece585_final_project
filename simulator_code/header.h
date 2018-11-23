@@ -82,6 +82,7 @@ class cache
         // Private functions
         int read_miss_handler(entry to_add, int verbose);
         int write_miss_handler(entry to_add, int verbose);
+        void print_all_sets(void) const;
 };
 
 class set
@@ -102,6 +103,7 @@ class set
         int evict(void);
         int invalidate_snoop(entry to_invalidate, int verbose);
         void update_lru(int index, int verbose);
+        void print_all_entries(void) const;
 
     private:
         entry ** all_tags;   // All lines in the set
@@ -138,6 +140,7 @@ class entry
         void populate_entry(int raw_addr, int verbose);
         int compare_entries(entry to_compare, int verbose) const;
         int invalidate_snoop(int verbose);
+        void print_entry(void) const;
 
     private:
         bool empty;

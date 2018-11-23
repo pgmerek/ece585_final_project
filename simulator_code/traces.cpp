@@ -9,18 +9,18 @@
 traces::traces()
 {
     operation = -1;
-    address = 0;
+    address = -1;
     has_address = false;
 }
 
 traces::~traces()
 {
     operation = -1;
-    address = 0;
+    address = -1 ;
     has_address = false;
 }
 
-bool traces::populate(char * line, bool verbose)
+bool traces::populate(char * line, int verbose)
 {
     char * endPtr;
     bool error = true;
@@ -31,14 +31,14 @@ bool traces::populate(char * line, bool verbose)
         {
             has_address = false;
             address = -1;
-            if (verbose)
+            if (verbose == 2)
                 printf("Operation: %d, address: (none)\n", operation);
         }
         else
         {
             has_address = true;
             address = strtol(endPtr, NULL, 16);  // Convert hex string address to long integer
-            if (verbose)
+            if (verbose == 2)
                 printf("Operation: %d, address: %x.\n", operation, address);
         }
         error = false;

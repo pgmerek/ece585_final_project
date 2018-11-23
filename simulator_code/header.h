@@ -22,6 +22,7 @@ using namespace std;
 #define BUFFER_SIZE 256
 #define HIT 1
 #define MISS 0
+#define ERROR -1
 // Define the MESI States
 #define MODIFIED 0
 #define INVALID 1
@@ -30,8 +31,8 @@ using namespace std;
 
 // Address mask constants
 #define MASK_FOR_TAG 0xFFF00000
-#define MASK_FOR_SET 0x000FFFC0
-#define MASK_FOR_BYTE_INDEX = 0x0000003F
+#define MASK_FOR_INDEX 0x000FFFC0
+#define MASK_FOR_BYTE_OFFSET 0x0000003F
 
 // Forward declare all classes
 class cache;
@@ -44,18 +45,29 @@ class cache
     public:
         cache(int assoc);
         ~cache();
+        // Get functions
         int get_reads() const { return reads; } 
         int get_writes() const { return writes; }
         int get_hits() const { return hits; }
         int get_misses() const { return misses; }
-        int reset_stats();
-        float hit_miss_ratio() const;
-        int invalid_memory(entry tag, int operation);
-        int invalid_snoop(entry tag);
-        int shared_memory(entry tag, int operatoion);
+        int reset_stats(int verbose);
+        float get_hit_miss_ratio() const;
+        // Set functions
+        void increment_reads(void) { ++reads; };
+        void increment_writes(void) { ++writes; };
+        void increment_hits(void) { ++hits; };
+        void increment_misses(void) { ++misses; };
+        // All others
+        int invalidate_snoop(entry invalid_entry, int verbose);
+        int miss_handler(entry to_add, int operation, int verbose);
+        int shared_memory(entry tag, int operation);
         int shared_snoop(entry tag, int operation);
-        int snoop(unsigned int tag);
-
+        int modified_memory(entry tag, int operation);
+        int snoop(unsigned int tag) const;
+        int contains(entry compare_to, int verbose);
+        int write(entry to_add, int new_mesi, int verbose);
+        int clear (int verbose);
+        void print_contents(void) const;
 
     private:
         // Number of...
@@ -63,36 +75,38 @@ class cache
         int misses;
         int reads;
         int writes;
-        int operations;
         // Cache parameters
         int associativity;
         // Pointer to the sets in the cache
         set ** Sets;
+        // Private functions
+        int read_miss_handler(entry to_add, int verbose);
+        int write_miss_handler(entry to_add, int verbose);
 };
 
 class set
 {
     public:
-        set(int set_associativity, int set_index, int set_address_bits, int set_index_bits, int set_offset_bits);
-        set (int associativity);
-        ~set();
-        int read(unsigned int tag);
+        set(int assoc, entry new_entry, int verbose);
+        set(int assoc, entry new_entry, int new_mesi, int verbose);
+        set(int assoc);
+        ~set(void);
+        // Get functions
         int is_full(void);
-        void read_miss_handler(unsigned int tag);
-        void update_lru(void);
+        int is_empty(void);
+        // Other functions
+        int read(unsigned int tag);
+        int write(entry to_add, int verbose);
+        int write(entry to_add, int new_mesi, int verbose);
+        int contains(entry compare_to, int verbose);
+        int evict(void);
+        int invalidate_snoop(entry to_invalidate, int verbose);
+        void update_lru(int index, int verbose);
 
     private:
-        entry * all_tags;   // All lines in the set
+        entry ** all_tags;   // All lines in the set
         int count;
         int associativity;
-        unsigned int index;
-        unsigned int address_bits;
-        unsigned int index_bits;
-        unsigned int offset_bits;
-        // Private functions
-        void read_miss_handler(void);
-        
-
 };
 
 // Object for tag array/entry/line
@@ -100,12 +114,15 @@ class entry
 {
     public:
         entry();
+        entry(entry to_copy, int verbose);
         ~entry();
         // Set functions
         void set_tag(int new_tag) { tag = new_tag; };
         void set_index(int new_index) { index = new_index; };
         void set_offset(int new_offset) { offset = new_offset; };
         void set_lru(int new_lru) { lru = new_lru; };
+        void dec_lru(int verbose);
+        void inc_lru(int verbose);
         void set_mesi(int new_mesi) { mesi = new_mesi; };
         void set_raw_address(int new_raw_address) { raw_address = new_raw_address; };
         // Get functions
@@ -115,12 +132,15 @@ class entry
         int get_lru(void) const { return lru; }
         int get_mesi(void) const { return mesi; }
         int get_raw_address(void) const { return raw_address; }
+        int is_empty(void) const { return empty; }
         // All others
-        void evict(void);
-        void copy_entry(entry to_copy);
-        int compare_entries(entry to_compare) const;
+        void copy_entry(entry to_copy, int verbose);
+        void populate_entry(int raw_addr, int verbose);
+        int compare_entries(entry to_compare, int verbose) const;
+        int invalidate_snoop(int verbose);
 
     private:
+        bool empty;
         int tag;
         int index;
         int offset;
@@ -134,13 +154,13 @@ class traces
     public:
         traces(void);
         ~traces(void);
-        bool populate(char * line, bool verbose);
+        bool populate(char * line, int verbose);
         int get_operation(void) const { return operation; };
         int get_address(void) const { return address; };
     private:
         int operation;
-        bool has_address;   // False for operations 8 and 9, true otherwise
+        bool has_address;   // False for when operation equal 8 or 9, true otherwise
         int address;
 };
 
-int read_file(traces ** references, char * fileName, bool verbose);
+int read_file(traces ** references, char * fileName, int verbose);

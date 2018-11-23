@@ -10,7 +10,7 @@ int main(int argc, char * argv[])
 {
     char file_name[BUFFER_SIZE];
     int verbose = false;
-    int num_lines = 0;
+    int num_traces = 0;
     // Used when processing file to cache
     int operation = -1;
     int raw_address = -1;
@@ -33,8 +33,8 @@ int main(int argc, char * argv[])
         return 0;
     }
     // Read data from file
-    num_lines = read_file(&references, file_name, verbose);
-    if (num_lines < 0 || !references)
+    num_traces = read_file(&references, file_name, verbose);
+    if (num_traces < 0 || !references)
     {
         printf("An error occured when reading the file. Exiting....\n");
         return 0;
@@ -43,7 +43,7 @@ int main(int argc, char * argv[])
     cache data(DATA_NUM_LINES);
     cache instruction(INSTR_NUM_LINES);
 
-    for (int k = 0; k < num_lines; ++k)
+    for (int k = 0; k < num_traces; ++k)
     {
         operation = references[k].get_operation();
         raw_address = references[k].get_address();
@@ -51,10 +51,15 @@ int main(int argc, char * argv[])
         tag = temp_entry.get_tag();
         index = temp_entry.get_index();
         offset = temp_entry.get_offset();
+
+        if (verbose == 2)
+            printf("=======On case number %d, address %x. ", k, raw_address);
         
         switch (operation)
         {
             case 0: // Read data request, sent to L1 from memory
+                if (verbose == 2)
+                    printf("Read data request.=======\n");
                 data.increment_reads();
                 if (data.contains(temp_entry, verbose))
                 {
@@ -71,6 +76,8 @@ int main(int argc, char * argv[])
                 }
                 break;
             case 1: // Write to L1 data cache, sent to L1 from memory
+                if (verbose == 2)
+                    printf("Write data request.=======\n");
                 data.increment_writes();
                 if (data.contains(temp_entry, verbose))
                 {
@@ -81,12 +88,14 @@ int main(int argc, char * argv[])
                 {
                     data.increment_misses();
                     if (!data.miss_handler(temp_entry, operation, verbose))
-                        printf("An error occured in the read miss handler.\n");
+                        printf("An error occured when reading from the data cache.\n");
                     else
                         printf("Miss\n");
                 }
                 break;
             case 2: // Read from instruction cache
+                if (verbose == 2)
+                    printf("Read instruction request.=======\n");
                 instruction.increment_reads();
                 if (instruction.contains(temp_entry, verbose))
                 {
@@ -96,12 +105,15 @@ int main(int argc, char * argv[])
                 else
                 {
                     instruction.increment_misses();
-                    instruction.write(temp_entry, verbose);
-                    printf("Miss\n");
+                    if (!instruction.miss_handler(temp_entry, operation, verbose))
+                        printf("An error occured when reading from the instruction cache.\n");
+                    else
+                        printf("Miss\n");
                 }
-                // Update MESI
                 break;
             case 3: // Invalidate from L2
+                if (verbose == 2)
+                    printf("Invalidate from L2 request.=======\n");
                 // request to change another line to invalid from another cache
                 // Need to search for an entry in the cache. if found, invalidate it.
                 // Refer to snoop diagram for logic on updating hits/misses and writing back to L2 (just a print statement)
@@ -124,12 +136,18 @@ int main(int argc, char * argv[])
 
                 break;
             case 4: // Data request from L2
+                if (verbose == 2)
+                    printf("Data request from L2.=======\n");
                 break;
             case 8: // Clear cache and reset all statistics
+                if (verbose == 2)
+                    printf("Clear cache request.=======\n");
                 data.clear(verbose);
                 instruction.clear(verbose);   
                 break;
             case 9: // Print contents and state of the cache
+                if (verbose == 2)
+                    printf("Print contents request.=======\n");
                 data.print_contents();
                 break;
             default:

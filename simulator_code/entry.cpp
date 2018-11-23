@@ -17,6 +17,20 @@ entry::entry()
     empty = 1;
 }
 
+entry::entry(entry to_copy, int verbose)
+{
+    // Raw address contains the tag, set index, and byte offset
+    raw_address = to_copy.get_raw_address();
+    // Use masks defined in header to find each field
+    tag = (raw_address & MASK_FOR_TAG) >> 20;
+    index = (raw_address & MASK_FOR_INDEX) >> 6;
+    offset = raw_address & MASK_FOR_BYTE_OFFSET;
+    empty = 0;
+    mesi = INVALID;
+    if (verbose == 2)
+        printf("Created raw_address %x, tag %d, index %d, and offset %d.\n", raw_address, tag, index, offset);
+}
+
 entry::~entry()
 {
     tag = -1;
@@ -25,13 +39,6 @@ entry::~entry()
     lru = -1;
     mesi = INVALID;
     raw_address = -1;
-    empty = 1;
-}
-
-void entry::evict(int verbose)
-{
-    if (verbose == 2)
-        printf("Entry evicted.\n");
     empty = 1;
 }
 

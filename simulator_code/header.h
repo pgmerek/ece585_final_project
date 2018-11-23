@@ -65,7 +65,6 @@ class cache
         int modified_memory(entry tag, int operation);
         int snoop(unsigned int tag) const;
         int contains(entry compare_to, int verbose);
-        int write(entry to_add, int verbose);
         int write(entry to_add, int new_mesi, int verbose);
         int clear (int verbose);
         void print_contents(void) const;
@@ -100,12 +99,12 @@ class set
         int write(entry to_add, int verbose);
         int write(entry to_add, int new_mesi, int verbose);
         int contains(entry compare_to, int verbose);
-        int evict(entry to_add, int verbose);
+        int evict(void);
         int invalidate_snoop(entry to_invalidate, int verbose);
         void update_lru(int index, int verbose);
 
     private:
-        entry * all_tags;   // All lines in the set
+        entry ** all_tags;   // All lines in the set
         int count;
         int associativity;
 };
@@ -115,6 +114,7 @@ class entry
 {
     public:
         entry();
+        entry(entry to_copy, int verbose);
         ~entry();
         // Set functions
         void set_tag(int new_tag) { tag = new_tag; };
@@ -134,7 +134,6 @@ class entry
         int get_raw_address(void) const { return raw_address; }
         int is_empty(void) const { return empty; }
         // All others
-        void evict(int verbose);
         void copy_entry(entry to_copy, int verbose);
         void populate_entry(int raw_addr, int verbose);
         int compare_entries(entry to_compare, int verbose) const;

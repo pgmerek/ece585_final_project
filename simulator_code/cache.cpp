@@ -17,7 +17,6 @@ cache::cache(int assoc)
 	//Set each set to NULL
 	for (int i = 0; i < NUM_SETS; ++i)
 		Sets[i] = NULL;
-
 }
 
 cache::~cache()
@@ -65,34 +64,31 @@ int cache::contains(entry compare_to, int verbose)
     }
     return match;
 }
-   
-int cache::write(entry to_add, int verbose)
-{
-    int set_index = to_add.get_index();
-    int success = 0; 
-
-    if (Sets[set_index])   // Set isn't empty
-        success = Sets[set_index]->write(to_add, verbose);
-    else    // Set is empty, make a new one
-    {
-        Sets[set_index] = new set(associativity);
-        success = Sets[set_index]->write(to_add, verbose);
-    }
-
-    return success;
-}
-
+  
 int cache::write(entry to_add, int new_mesi, int verbose)
 {
     int set_index = to_add.get_index();
     int success = 0; 
 
-    if (Sets[set_index])   // Set isn't empty
-        success = Sets[set_index]->write(to_add, new_mesi, verbose);
-    else    // Set is empty, make a new one
+    if (Sets)   // If the sets exist....
     {
-        Sets[set_index] = new set(associativity);
-        success = Sets[set_index]->write(to_add, new_mesi, verbose);
+        if (Sets[set_index])   // Set isn't empty
+            success = Sets[set_index]->write(to_add, new_mesi, verbose);
+        else    // Set is empty, make a new one
+        {
+            printf("Making new set with %d. and set index %d\n", associativity, set_index);
+            Sets[set_index] = new set(associativity);
+            success = Sets[set_index]->write(to_add, new_mesi, verbose);
+        }
+    }
+    else    // Otherwise make it
+    {
+        Sets = new set * [NUM_SETS];
+        //Set each set to NULL
+        for (int i = 0; i < NUM_SETS; ++i)
+            Sets[i] = NULL;
+        // Recursive call 
+        success = write(to_add, new_mesi, verbose);
     }
 
     return success;
@@ -113,11 +109,11 @@ int cache::clear(int verbose)
                 Sets[i] = NULL;
             }
         }
-    if (verbose == 2)
-        printf("Sets Cleared.\n");
+        if (verbose == 2)
+            printf("Sets Cleared.\n");
 
-    delete [] Sets;
-    Sets = NULL;
+        delete [] Sets;
+        Sets = NULL;
     }
     return 1;
 }
@@ -153,11 +149,14 @@ int cache::miss_handler(entry to_add, int operation, int verbose)
     int success = 0;
     switch (operation)
     {
-        case 0: // Read
+        case 0: // Data read
             success = read_miss_handler(to_add, verbose);
             break;
         case 1: // Write
             success = write_miss_handler(to_add, verbose);
+            break;
+        case 2: // Instruction read 
+            success = read_miss_handler(to_add, verbose);
             break;
     }
 
@@ -184,20 +183,7 @@ int cache::read_miss_handler(entry to_add, int verbose)
 
 int cache::write_miss_handler(entry to_add, int verbose)
 {
-    int success = 0;
-    int tag = to_add.get_tag();
-    // Check if tag is in other caches (this should never happen)
-    if (snoop(tag))
-    {
-        if (verbose)
-            printf("Found entry in other cache, setting mesi to SHARED. This should never happen.\n");
-        to_add.set_mesi(SHARED);
-        success = 1;
-    }
-    else    // Requested is not in other caches, write as exclusive
-        success = write(to_add, EXCLUSIVE, verbose);
-
-	return success;
+    return write(to_add, MODIFIED, verbose);
 }
 
 // Transition handlers for lines that are Shared

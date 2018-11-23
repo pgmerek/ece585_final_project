@@ -17,7 +17,6 @@ cache::cache(int assoc)
 	//Set each set to NULL
 	for (int i = 0; i < NUM_SETS; ++i)
 		Sets[i] = NULL;
-
 }
 
 cache::~cache()
@@ -54,11 +53,6 @@ int cache::contains(entry compare_to, int verbose)
 
         if (Sets[set_index])   // Set isn't empty
             match = Sets[set_index]->contains(compare_to, verbose);
-
-        if (!match)
-            ++misses;
-        else
-            ++hits;
     }
     else
     {
@@ -70,16 +64,32 @@ int cache::contains(entry compare_to, int verbose)
     }
     return match;
 }
-   
-int cache::write(entry to_add, int verbose)
+  
+int cache::write(entry to_add, int new_mesi, int verbose)
 {
     int set_index = to_add.get_index();
     int success = 0; 
 
-    if (Sets[set_index])   // Set isn't empty
-        success = Sets[set_index]->write(to_add, verbose);
-    else    // Set is empty, make a new one
-        Sets[set_index] = new set(associativity, to_add, verbose);
+    if (Sets)   // If the sets exist....
+    {
+        if (Sets[set_index])   // Set isn't empty
+            success = Sets[set_index]->write(to_add, new_mesi, verbose);
+        else    // Set is empty, make a new one
+        {
+            printf("Making new set with %d. and set index %d\n", associativity, set_index);
+            Sets[set_index] = new set(associativity);
+            success = Sets[set_index]->write(to_add, new_mesi, verbose);
+        }
+    }
+    else    // Otherwise make it
+    {
+        Sets = new set * [NUM_SETS];
+        //Set each set to NULL
+        for (int i = 0; i < NUM_SETS; ++i)
+            Sets[i] = NULL;
+        // Recursive call 
+        success = write(to_add, new_mesi, verbose);
+    }
 
     return success;
 }
@@ -99,11 +109,11 @@ int cache::clear(int verbose)
                 Sets[i] = NULL;
             }
         }
-    if (verbose == 2)
-        printf("Sets Cleared.\n");
+        if (verbose == 2)
+            printf("Sets Cleared.\n");
 
-    delete [] Sets;
-    Sets = NULL;
+        delete [] Sets;
+        Sets = NULL;
     }
     return 1;
 }
@@ -120,45 +130,60 @@ int cache::reset_stats(int verbose)
     return 1;
 }
 
-
-// Transition handlers for invalid lines
-// These were numbers 1, 4, and 7 for the controller accessing memory
-// Transition 1 for snoop
-
-// This should be used every time we have a memory request for 
-// a line that is invalid 
-int cache::invalid_memory(entry tag, int operation)
+int cache::invalidate_snoop(entry to_invalidate, int verbose)
 {
-	// read
-	if (operation == 0)
-	{
-		
-		// This should never happen
-		if (snoop(tag.get_tag())== true)
-			tag.set_mesi(SHARED);
-		else 
-			// should have message that says "reading from memory..."
-			tag.set_mesi(EXCLUSIVE);
-	}
-	//write
-	else if (operation == 1)
-	{
-		//should have message that says "RFO L2 <address>
-		tag.set_mesi(MODIFIED);
-	}
+    int set_index = to_invalidate.get_index();
+    int success = ERROR;
+    
+    if (Sets)
+    {
+        if (Sets[set_index])   // Set isn't empty
+            success = Sets[set_index]->invalidate_snoop(to_invalidate, verbose);
+    }
 
-	return 1;
+    return success;
 }
 
-// Every time the processor snoops the L2 cache for a line 
-// that is invalid in L1, the line should remain invalid
-int cache::invalid_snoop(entry tag)
+int cache::miss_handler(entry to_add, int operation, int verbose)
 {
-	// This should always happen
-	if (snoop(tag.get_tag()) == false)
-	    tag.set_mesi(INVALID);
-	return 1;
-	
+    int success = 0;
+    switch (operation)
+    {
+        case 0: // Data read
+            success = read_miss_handler(to_add, verbose);
+            break;
+        case 1: // Write
+            success = write_miss_handler(to_add, verbose);
+            break;
+        case 2: // Instruction read 
+            success = read_miss_handler(to_add, verbose);
+            break;
+    }
+
+    return success;
+}
+
+int cache::read_miss_handler(entry to_add, int verbose)
+{
+    int success = 0;
+    int tag = to_add.get_tag();
+    // Check if tag is in other caches (this should never happen)
+    if (snoop(tag))
+    {
+        if (verbose)
+            printf("Found entry in other cache, setting mesi to SHARED. This should never happen.\n");
+        to_add.set_mesi(SHARED);
+        success = 1;
+    }
+    else    // Requested is not in other caches, write as exclusive
+        success = write(to_add, EXCLUSIVE, verbose);
+
+	return success;
+}
+
+int cache::write_miss_handler(entry to_add, int verbose)
+{
+    return write(to_add, MODIFIED, verbose);
 }
 
 // Transition handlers for lines that are Shared
@@ -191,15 +216,14 @@ int cache::shared_snoop(entry tag, int operation)
 // cache is not in the L2 cache
 // We will execute this every time we have a miss in the 
 // L1 cache
-int cache::snoop(unsigned int tag)
+int cache::snoop(unsigned int tag) const
 {
 	return false;
 }
 
 void cache::print_contents() const
 {
-    printf("Currently, of the %d operations that have occurred, %d have been hits and %d have been misses.\n", hits + misses, hits, misses);
-    printf("Currently, of the %d operations that have occurred, %d have been reads and %d have been writes.\n", reads + writes, reads, writes); 
+    printf("Currently, of the %d operations that have occured, %d have been hits and %d have been misses.\n", hits + misses, hits, misses);
     printf("This represents a hit-miss ratio of %f.\n", get_hit_miss_ratio());
 }
 
@@ -213,3 +237,4 @@ float cache::get_hit_miss_ratio() const
     
     return h / m;
 }
+

@@ -58,8 +58,8 @@ class cache
         void increment_hits(void) { ++hits; };
         void increment_misses(void) { ++misses; };
         // All others
-        int invalidate_snoop(entry to_invalidate, int verbose);
-        int invalidate_memory(entry to_invalidate, int operation, int verbose);
+        int invalidate_snoop(entry invalid_entry, int verbose);
+        int miss_handler(entry to_add, int operation, int verbose);
         int shared_memory(entry tag, int operation);
         int shared_snoop(entry tag, int operation);
         int modified_memory(entry tag, int operation);
@@ -80,6 +80,9 @@ class cache
         int associativity;
         // Pointer to the sets in the cache
         set ** Sets;
+        // Private functions
+        int read_miss_handler(entry to_add, int verbose);
+        int write_miss_handler(entry to_add, int verbose);
 };
 
 class set
@@ -99,7 +102,7 @@ class set
         int contains(entry compare_to, int verbose);
         int evict(entry to_add, int verbose);
         int invalidate_snoop(entry to_invalidate, int verbose);
-        void update_lru(int index);
+        void update_lru(int index, int verbose);
 
     private:
         entry * all_tags;   // All lines in the set
@@ -118,8 +121,8 @@ class entry
         void set_index(int new_index) { index = new_index; };
         void set_offset(int new_offset) { offset = new_offset; };
         void set_lru(int new_lru) { lru = new_lru; };
-        void dec_lru(void);
-        void inc_lru(void);
+        void dec_lru(int verbose);
+        void inc_lru(int verbose);
         void set_mesi(int new_mesi) { mesi = new_mesi; };
         void set_raw_address(int new_raw_address) { raw_address = new_raw_address; };
         // Get functions

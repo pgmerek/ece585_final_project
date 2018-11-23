@@ -64,9 +64,10 @@ int main(int argc, char * argv[])
                 else
                 {
                     data.increment_misses();
-                    data.invalidate_memory(temp_entry, operation, verbose);
-                    // Might need to include print statement for write back
-                    printf("Miss\n");
+                    if (!data.miss_handler(temp_entry, operation, verbose))
+                        printf("An error occured in the read miss handler.\n");
+                    else
+                        printf("Miss\n");
                 }
                 break;
             case 1: // Write to L1 data cache, sent to L1 from memory
@@ -79,10 +80,11 @@ int main(int argc, char * argv[])
                 else
                 {
                     data.increment_misses();
-                    data.invalidate_memory(temp_entry, operation, verbose);
-                    printf("Miss\n");
+                    if (!data.miss_handler(temp_entry, operation, verbose))
+                        printf("An error occured in the read miss handler.\n");
+                    else
+                        printf("Miss\n");
                 }
-                // Update MESI
                 break;
             case 2: // Read from instruction cache
                 instruction.increment_reads();
@@ -123,7 +125,6 @@ int main(int argc, char * argv[])
                 break;
             case 4: // Data request from L2
                 break;
-                return -1;
             case 8: // Clear cache and reset all statistics
                 data.clear(verbose);
                 instruction.clear(verbose);   

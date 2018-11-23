@@ -74,7 +74,10 @@ int cache::write(entry to_add, int verbose)
     if (Sets[set_index])   // Set isn't empty
         success = Sets[set_index]->write(to_add, verbose);
     else    // Set is empty, make a new one
-        Sets[set_index] = new set(associativity, to_add, verbose);
+    {
+        Sets[set_index] = new set(associativity);
+        success = Sets[set_index]->write(to_add, verbose);
+    }
 
     return success;
 }
@@ -87,7 +90,10 @@ int cache::write(entry to_add, int new_mesi, int verbose)
     if (Sets[set_index])   // Set isn't empty
         success = Sets[set_index]->write(to_add, new_mesi, verbose);
     else    // Set is empty, make a new one
-        Sets[set_index] = new set(associativity,to_add, new_mesi, verbose);
+    {
+        Sets[set_index] = new set(associativity);
+        success = Sets[set_index]->write(to_add, new_mesi, verbose);
+    }
 
     return success;
 }
@@ -142,34 +148,54 @@ int cache::invalidate_snoop(entry to_invalidate, int verbose)
     return success;
 }
 
-// Transition handlers for invalid lines
-// These were numbers 1, 4, and 7 for the controller accessing memory
-// Transition 1 for snoop
-
-// This should be used every time we have a memory request for 
-// a line that is invalid 
-
-int cache::invalidate_memory(entry to_invalidate, int operation, int verbose)
+int cache::miss_handler(entry to_add, int operation, int verbose)
 {
-    int success = false;
-    int tag = to_invalidate.get_tag();
+    int success = 0;
     switch (operation)
     {
         case 0: // Read
-            // Check if tag is in other caches (this should never happen)
-            if (snoop(tag))
-            {
-                if (verbose)
-                    printf("Found entry in other cache, setting mesi to SHARED. This should never happen.\n");
-                to_invalidate.set_mesi(SHARED);
-            }
-            else    // Requested is not in other caches, write as exclusive
-                success = write(to_invalidate, EXCLUSIVE, verbose);
+            success = read_miss_handler(to_add, verbose);
             break;
         case 1: // Write
-            // Need meat here
+            success = write_miss_handler(to_add, verbose);
             break;
     }
+
+    return success;
+}
+
+int cache::read_miss_handler(entry to_add, int verbose)
+{
+    int success = 0;
+    int tag = to_add.get_tag();
+    // Check if tag is in other caches (this should never happen)
+    if (snoop(tag))
+    {
+        if (verbose)
+            printf("Found entry in other cache, setting mesi to SHARED. This should never happen.\n");
+        to_add.set_mesi(SHARED);
+        success = 1;
+    }
+    else    // Requested is not in other caches, write as exclusive
+        success = write(to_add, EXCLUSIVE, verbose);
+
+	return success;
+}
+
+int cache::write_miss_handler(entry to_add, int verbose)
+{
+    int success = 0;
+    int tag = to_add.get_tag();
+    // Check if tag is in other caches (this should never happen)
+    if (snoop(tag))
+    {
+        if (verbose)
+            printf("Found entry in other cache, setting mesi to SHARED. This should never happen.\n");
+        to_add.set_mesi(SHARED);
+        success = 1;
+    }
+    else    // Requested is not in other caches, write as exclusive
+        success = write(to_add, EXCLUSIVE, verbose);
 
 	return success;
 }
@@ -225,3 +251,4 @@ float cache::get_hit_miss_ratio() const
     
     return h / m;
 }
+

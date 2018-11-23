@@ -20,7 +20,7 @@ set::set(int assoc, entry new_entry, int verbose)
     count = 0;
 	all_tags = new entry[associativity];
     all_tags[0].copy_entry(new_entry, verbose);
-    update_lru(0);  // Updated lru for the first item
+    update_lru(0, verbose);  // Updated lru for the first item
 }
 
 set::set(int assoc, entry new_entry, int new_mesi, int verbose)
@@ -30,7 +30,7 @@ set::set(int assoc, entry new_entry, int new_mesi, int verbose)
 	all_tags = new entry[associativity];
     all_tags[0].copy_entry(new_entry, verbose);
     all_tags[0].set_mesi(new_mesi);
-    update_lru(0);  // Updated lru for the first item
+    update_lru(0, verbose);  // Updated lru for the first item
 }
 
 set::~set()
@@ -54,13 +54,11 @@ int set::contains(entry compare_to, int verbose)
             if (all_tags[j].compare_entries(compare_to, verbose))
             {
                 result = HIT;
-                update_lru(j);
+                update_lru(j, verbose);
                 break;
             }
         }
     }
-    else    // If our entries don't exist, return ERROR
-        result = ERROR;
 
     return result;
 }
@@ -78,20 +76,22 @@ int set::write(entry to_add, int verbose)
 
         if (j == associativity - 1) // Set is full
         {
-            printf("Set full in write operation. Evicting the lru.\n");
+            if (verbose == 2)
+                printf("Set full. Evicting the lru and writing %x.\n", to_add.get_raw_address());
             lru_index = evict(to_add, verbose);
-            update_lru(lru_index);
+            update_lru(lru_index, verbose);
         }
         else    // Set isn't full
         {
-            printf("Set isn't full in write operation.\n");
+            if (verbose == 2)
+                printf("Set isn't full. No eviction need. Writing %x.\n", to_add.get_raw_address());
             all_tags[j].copy_entry(to_add, verbose);
-            update_lru(j);
+            update_lru(j, verbose);
         }
         success = 1;
     }
-    else    // If our entries don't exist, return ERROR
-        success = ERROR;
+    else
+        printf("all_tags don't exist boi\n");
 
     return success;
 }
@@ -109,22 +109,24 @@ int set::write(entry to_add, int new_mesi, int verbose)
 
         if (j == associativity - 1) // Set is full
         {
-            printf("Set full in write operation. Evicting the lru.\n");
+            if (verbose == 2)
+                printf("Set full. Evicting the lru and writing %x.\n", to_add.get_raw_address());
             lru_index = evict(to_add, verbose);
             all_tags[lru_index].set_mesi(new_mesi);
-            update_lru(lru_index);
+            update_lru(lru_index, verbose);
         }
         else    // Set isn't full
         {
-            printf("Set isn't full in write operation.\n");
+            if (verbose == 2)
+                printf("Set isn't full. No eviction need. Writing %x.\n", to_add.get_raw_address());
             all_tags[j].copy_entry(to_add, verbose);
             all_tags[j].set_mesi(new_mesi);
-            update_lru(j);
+            update_lru(j, verbose);
         }
         success = 1;
     }
-    else    // If our entries don't exist, return ERROR
-        success = ERROR;
+    else
+        printf("all_tags don't exist boi\n");
 
     return success;
 }
@@ -143,7 +145,7 @@ int set::evict(entry to_add, int verbose)
     }
 }
         
-void set::update_lru(int entry_index)     // Index is this context is NOT the same set index. This index just tells the function where the new entry is in the set
+void set::update_lru(int entry_index, int verbose)     // Index is this context is NOT the same set index. This index just tells the function where the new entry is in the set
 {
     // Retain old lru because we need to decrement the entries that
     // are more recent than the one we replace. Only used if set is full
@@ -153,11 +155,12 @@ void set::update_lru(int entry_index)     // Index is this context is NOT the sa
         if (k == entry_index)   // Set the new entry to the MRU
         {
             all_tags[k].set_lru(7);
-            printf("Setting lru to 7 for new entry.\n");
+            if (verbose == 2)
+                printf("Setting lru to 7 for new entry.\n");
         }
         // Decrement all other that were newer than the previous entry
         else if (all_tags[k].get_lru() > old_lru)
-            all_tags[k].dec_lru();
+            all_tags[k].dec_lru(verbose);
     }
 }
 

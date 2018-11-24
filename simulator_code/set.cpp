@@ -210,6 +210,7 @@ int set::is_empty(void)
    return 1;
 }
 
+
 int set::invalidate_snoop(entry to_invalidate, int verbose)
 {
     int result = ERROR;
@@ -229,15 +230,69 @@ int set::invalidate_snoop(entry to_invalidate, int verbose)
 
     return result;
 }
+
+
 void set::print_all_entries(void) const
 {
+    
     if (all_tags)
     {
-        for (int j = 0; j < associativity; ++j)
-        {
-            if (all_tags[j])
-                all_tags[j]->print_entry();
-        }
+        print_all_tags();
+        print_all_mesi();
+        print_all_lru();
     }
 }
 
+
+void set::print_all_tags() const
+{
+    printf("Tag: ");
+    for (int j = 0; j < associativity; ++j)
+    {
+        if (all_tags[j])
+            printf(" | %d |", all_tags[j]->get_tag());
+    }
+    printf("\n");
+ 
+}
+void set::print_all_mesi() const
+{
+    printf("MESI: ");
+
+    for (int j = 0; j < associativity; ++j)
+    {
+        if (all_tags[j])
+        {
+            switch(all_tags[j]->get_mesi())
+            {
+                case MODIFIED: 
+                    printf("| Modified |");
+                    break;
+                case EXCLUSIVE:
+                    printf("| Exclusive |");
+                    break;
+                case SHARED:
+                    printf("| Shared |");
+                    break;
+                case INVALID:
+                    printf("| Invalid |");
+                    break;
+                default: //should never happen
+                    printf("Error: No Mesi bits");
+            }
+        }
+    }
+    printf("\n");
+}
+
+
+void set::print_all_lru (void) const
+{
+    printf("LRU: ");
+    for (int j = 0; j < associativity; ++j)
+    {
+        if (all_tags[j])
+            printf(" | %d | ", all_tags[j]->get_lru());
+    }
+    printf("\n");
+}

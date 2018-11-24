@@ -222,17 +222,17 @@ int cache::snoop(unsigned int tag) const
 	return false;
 }
 
-void cache::print_contents() const
-{
-    printf("Currently, of the %d operations that have occured, %d have been hits and %d have been misses.\n", hits + misses, hits, misses);
-    printf("This represents a hit-miss ratio of %f.\n", get_hit_miss_ratio());
-    print_all_sets();
 
+void cache::print_statistics (void) const
+{
+    printf(" Reads: %d\n Writes: %d\n Hits: %d\n Misses: %d\n Hit-Miss Ratio: %.2f\n", 
+            reads, writes, hits, misses, get_hit_miss_ratio());
 }
 
-void cache::print_all_sets(void) const
+
+void cache::print_contents() const
 {
-    if (Sets)
+     if (Sets)
     {
         for (int i = 0; i < NUM_SETS; ++i)
         {
@@ -245,7 +245,9 @@ void cache::print_all_sets(void) const
     }
     else
         printf("Cache is empty");
+
 }
+
 
 float cache::get_hit_miss_ratio() const
 {

@@ -179,9 +179,9 @@ void set::update_lru(int entry_index, int verbose)     // Index is this context 
     {
         if (k == entry_index)   // Set the new entry to the MRU
         {
-            all_tags[k]->set_lru(7);
+            all_tags[k]->set_lru(associativity - 1);
             if (verbose == 2)
-                printf("Setting lru of %x to 7.\n", all_tags[entry_index]->get_raw_address());
+                printf("Setting lru of %x to %d.\n", all_tags[entry_index]->get_raw_address(), associativity - 1);
         }
         // Decrement all other that were newer than the previous entry
         else
@@ -210,6 +210,44 @@ int set::is_empty(void)
    return 1;
 }
 
+int set::get_entry_mesi(entry to_retrieve, int verbose) const
+{
+    int mesi = -1;
+    if (all_tags)
+    {
+        // Search for a matching entry
+        for (int j = 0; j < associativity; ++j)
+        {
+            if (all_tags[j] && all_tags[j]->compare_entries(to_retrieve, verbose))
+            {
+                mesi = all_tags[j]->get_mesi();
+                break;
+            }
+        }
+    }
+
+    return mesi;
+}
+
+int set::set_entry_mesi(entry to_set, int new_mesi, int verbose)
+{
+    int success = 0;
+    if (all_tags)
+    {
+        // Search for a matching entry
+        for (int j = 0; j < associativity; ++j)
+        {
+            if (all_tags[j] && all_tags[j]->compare_entries(to_set, verbose))
+            {
+                all_tags[j]->set_mesi(new_mesi);
+                success = 1;
+                break;
+            }
+        }
+    }
+
+    return success;
+}
 
 int set::invalidate_snoop(entry to_invalidate, int verbose)
 {

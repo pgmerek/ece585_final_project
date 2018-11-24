@@ -146,6 +146,30 @@ int main(int argc, char * argv[])
             case 4: // Data request from L2
                 if (verbose == 2)
                     printf("Data request from L2.=======\n");
+                data.increment_reads();
+                if (data.contains(temp_entry, verbose))
+                {
+                    // Update mesi
+                    if (!data.read_request(temp_entry, verbose))
+                        printf("An error occured when executing the data request from L2.\n");
+                    if (verbose == 2)
+                        printf("Hit\n");
+                }
+                else
+                {
+                    data.increment_misses();
+                    /*
+                    if (!data.miss_handler(temp_entry, operation, verbose))
+                    {
+                        if (verbose ==2)
+                        printf("An error occured when reading from the data cache.\n");
+                    }
+                    else
+                    {
+                        if (verbose == 2)
+                            printf("Miss\n");
+                    }*/
+                }
                 break;
             case 8: // Clear cache and reset all statistics
                 if (verbose == 2)

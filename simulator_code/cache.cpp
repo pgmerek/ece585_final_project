@@ -164,6 +164,68 @@ int cache::miss_handler(entry to_add, int operation, int verbose)
     return success;
 }
 
+int cache::read_request(entry to_add, int verbose) 
+{
+    int success = 0;
+    int current_mesi = get_entry_mesi(to_add, verbose);
+    switch (current_mesi)
+    {
+        case MODIFIED:
+            ++hits;
+            writeback(to_add, verbose);
+            success = set_entry_mesi(to_add, SHARED, verbose);
+            break;
+        case INVALID:
+            ++misses;
+            // Mesi stays INVALID
+            success = 1;
+            break;
+        case SHARED:
+            ++hits;
+            // Mesi stays SHARED
+            success = 1;
+            break;
+        case EXCLUSIVE:
+            ++hits;
+            success = set_entry_mesi(to_add, SHARED, verbose);
+            break;
+    }
+
+	return success;
+}
+
+int cache::get_entry_mesi(entry to_retrieve, int verbose) const
+{
+    int mesi = -1;
+    int set_index = to_retrieve.get_index();
+    
+    if (Sets)
+    {
+        if (Sets[set_index])   // Set isn't empty
+            mesi = Sets[set_index]->get_entry_mesi(to_retrieve, verbose);
+    }
+    return mesi;
+}
+
+int cache::set_entry_mesi(entry to_set, int new_mesi, int verbose) 
+{
+    int success = 0;
+    int set_index = to_set.get_index();
+    
+    if (Sets)
+    {
+        if (Sets[set_index])   // Set isn't empty
+            success = Sets[set_index]->set_entry_mesi(to_set, new_mesi, verbose);
+    }
+    return success;
+}
+
+void cache::writeback(entry to_writeback, int verbose) const
+{
+    if (verbose == 1)
+        printf("Return data to L2 %x\n", to_writeback.get_raw_address());
+}
+
 int cache::read_miss_handler(entry to_add, int verbose)
 {
     int success = 0;
@@ -173,11 +235,12 @@ int cache::read_miss_handler(entry to_add, int verbose)
     {
         if (verbose)
             printf("Found entry in other cache, setting mesi to SHARED. This should never happen.\n");
-        to_add.set_mesi(SHARED);
-        success = 1;
+        success = write(to_add, SHARED, verbose);
     }
     else    // Requested is not in other caches, write as exclusive
+    {
         success = write(to_add, EXCLUSIVE, verbose);
+    }
 
 	return success;
 }
@@ -222,13 +285,11 @@ int cache::snoop(unsigned int tag) const
 	return false;
 }
 
-
 void cache::print_statistics (void) const
 {
     printf(" Reads: %d\n Writes: %d\n Hits: %d\n Misses: %d\n Hit-Miss Ratio: %.2f\n", 
             reads, writes, hits, misses, get_hit_miss_ratio());
 }
-
 
 void cache::print_contents() const
 {
@@ -247,7 +308,6 @@ void cache::print_contents() const
         printf("Cache is empty");
 
 }
-
 
 float cache::get_hit_miss_ratio() const
 {

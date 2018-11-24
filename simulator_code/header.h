@@ -59,6 +59,7 @@ class cache
         void increment_misses(void) { ++misses; };
         // All others
         int invalidate_snoop(entry invalid_entry, int verbose);
+        int read_request(entry to_add, int verbose);
         int miss_handler(entry to_add, int operation, int verbose);
         int shared_memory(entry tag, int operation);
         int shared_snoop(entry tag, int operation);
@@ -69,6 +70,7 @@ class cache
         int clear (int verbose);
         void print_contents(void) const;
         void print_statistics (void) const;
+        void writeback(entry to_writeback, int verbose) const;
 
     private:
         // Number of...
@@ -83,6 +85,8 @@ class cache
         // Private functions
         int read_miss_handler(entry to_add, int verbose);
         int write_miss_handler(entry to_add, int verbose);
+        int get_entry_mesi(entry to_retrieve, int verbose) const;
+        int set_entry_mesi(entry to_set, int new_mesi, int verbose);
 };
 
 class set
@@ -92,9 +96,12 @@ class set
         set(int assoc, entry new_entry, int new_mesi, int verbose);
         set(int assoc);
         ~set(void);
+        // Set functions
+        int set_entry_mesi(entry to_set, int new_mesi, int verbose);
         // Get functions
         int is_full(void);
         int is_empty(void);
+        int get_entry_mesi(entry to_retrieve, int verbose) const;
         // Other functions
         int read(unsigned int tag);
         int write(entry to_add, int verbose);

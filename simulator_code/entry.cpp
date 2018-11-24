@@ -135,3 +135,24 @@ void entry::inc_lru(int verbose)
     }
 }
 
+void entry::print_entry(void) const
+{
+    switch (mesi)
+    {
+        case MODIFIED:
+            printf("Tag: %d\nMESI: Modified\nLRU: %d\n",tag, lru);
+            break;
+        case EXCLUSIVE:
+            printf("Tag: %d\nMESI: Exclusive\nLRU: %d\n",tag, lru);
+            break;
+        case SHARED:
+            printf("Tag: %d\nMESI: Shared\nLRU: %d\n",tag, lru);
+            break;
+        case INVALID:
+            printf("Tag: %d\nMESI: Invalid\nLRU: %d\n",tag, lru);
+            break;
+        default:
+            printf("Error is print_entry. This should never happen");
+    }
+}
+

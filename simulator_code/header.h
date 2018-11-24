@@ -68,6 +68,7 @@ class cache
         int write(entry to_add, int new_mesi, int verbose);
         int clear (int verbose);
         void print_contents(void) const;
+        void print_statistics (void) const;
 
     private:
         // Number of...
@@ -102,11 +103,15 @@ class set
         int evict(void);
         int invalidate_snoop(entry to_invalidate, int verbose);
         void update_lru(int index, int verbose);
+        void print_all_entries(void) const;
 
     private:
         entry ** all_tags;   // All lines in the set
         int count;
         int associativity;
+        void print_all_tags(void) const;
+        void print_all_mesi(void) const;
+        void print_all_lru(void) const;
 };
 
 // Object for tag array/entry/line
@@ -138,6 +143,7 @@ class entry
         void populate_entry(int raw_addr, int verbose);
         int compare_entries(entry to_compare, int verbose) const;
         int invalidate_snoop(int verbose);
+        
 
     private:
         bool empty;

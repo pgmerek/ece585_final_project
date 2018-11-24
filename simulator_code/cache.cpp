@@ -1,4 +1,5 @@
 /* ECE 485/585 Fall Term 2018 Final Project
+                if (verbose == 2)
  * Split L1 Cache simulation, cache class functions
  * Members: Patrick Gmerek, Stephen Poanessa, Emma Smith, Amanda Voegtlin
  * 4 November 2018
@@ -221,11 +222,32 @@ int cache::snoop(unsigned int tag) const
 	return false;
 }
 
+
+void cache::print_statistics (void) const
+{
+    printf(" Reads: %d\n Writes: %d\n Hits: %d\n Misses: %d\n Hit-Miss Ratio: %.2f\n", 
+            reads, writes, hits, misses, get_hit_miss_ratio());
+}
+
+
 void cache::print_contents() const
 {
-    printf("Currently, of the %d operations that have occured, %d have been hits and %d have been misses.\n", hits + misses, hits, misses);
-    printf("This represents a hit-miss ratio of %f.\n", get_hit_miss_ratio());
+     if (Sets)
+    {
+        for (int i = 0; i < NUM_SETS; ++i)
+        {
+            if (Sets[i])
+            {
+                printf("=======Set %d========\n", i);
+                Sets[i]->print_all_entries();
+            }
+        }
+    }
+    else
+        printf("Cache is empty");
+
 }
+
 
 float cache::get_hit_miss_ratio() const
 {

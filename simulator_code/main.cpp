@@ -14,10 +14,6 @@ int main(int argc, char * argv[])
     // Used when processing file to cache
     int operation = -1;
     int raw_address = -1;
-    int address = -1;
-    int tag = -1;
-    int index = -1;
-    int offset = -1;
     traces * references = NULL;
     entry temp_entry;
 
@@ -48,9 +44,6 @@ int main(int argc, char * argv[])
         operation = references[k].get_operation();
         raw_address = references[k].get_address();
         temp_entry.populate_entry(raw_address, verbose);
-        tag = temp_entry.get_tag();
-        index = temp_entry.get_index();
-        offset = temp_entry.get_offset();
 
         if (verbose == 2)
             printf("=======On case number %d, address %x. ", k, raw_address);
@@ -64,15 +57,22 @@ int main(int argc, char * argv[])
                 if (data.contains(temp_entry, verbose))
                 {
                     data.increment_hits();
-                    printf("Hit\n");
+                    if (verbose == 2)
+                        printf("Hit\n");
                 }
                 else
                 {
                     data.increment_misses();
                     if (!data.miss_handler(temp_entry, operation, verbose))
-                        printf("An error occured in the read miss handler.\n");
+                    {
+                        if (verbose ==2)
+                        printf("An error occured when reading from the data cache.\n");
+                    }
                     else
-                        printf("Miss\n");
+                    {
+                        if (verbose == 2)
+                            printf("Miss\n");
+                    }
                 }
                 break;
             case 1: // Write to L1 data cache, sent to L1 from memory
@@ -82,15 +82,22 @@ int main(int argc, char * argv[])
                 if (data.contains(temp_entry, verbose))
                 {
                     data.increment_hits();
-                    printf("Hit\n");
+                    if (verbose == 2)
+                        printf("Hit\n");
                 }
                 else
                 {
                     data.increment_misses();
                     if (!data.miss_handler(temp_entry, operation, verbose))
+                    {
+                        if (verbose ==2)
                         printf("An error occured when reading from the data cache.\n");
+                    }
                     else
-                        printf("Miss\n");
+                    {
+                        if (verbose == 2)
+                            printf("Miss\n");
+                    }
                 }
                 // Might need to invalid copy in L2 if write miss and entry is shared
                 break;
@@ -101,15 +108,22 @@ int main(int argc, char * argv[])
                 if (instruction.contains(temp_entry, verbose))
                 {
                     instruction.increment_hits();
-                    printf("Hit\n");
+                    if (verbose == 2)
+                        printf("Hit\n");
                 }
                 else
                 {
                     instruction.increment_misses();
                     if (!instruction.miss_handler(temp_entry, operation, verbose))
-                        printf("An error occured when reading from the instruction cache.\n");
+                    {
+                        if (verbose == 2)
+                            printf("An error occured when reading from the instruction cache.\n");
+                    }
                     else
-                        printf("Miss\n");
+                    {
+                        if (verbose == 2)
+                            printf("Miss\n");
+                    }
                 }
                 break;
             case 3: // Invalidate from L2
@@ -142,12 +156,24 @@ int main(int argc, char * argv[])
             case 9: // Print contents and state of the cache
                 if (verbose == 2)
                     printf("Print contents request.=======\n");
+                printf("\n==================== Data Cache Contents ===================\n");
+                printf("\nKey: LRU = 0 and MRU = 7\n");
                 data.print_contents();
+                printf("\n====================Instruction Cache Contents ===================\n");
+                printf("\nKey: LRU = 0 and MRU = 3\n");
+                instruction.print_contents();
                 break;
             default:
                 printf("Operation invalid. %d is not a valid operation. Exiting....\n", operation);
                 return -1;
         }
+
+        printf("\n==================== Summary Statistics for trace %d =================\n", k + 1);
+        printf("--------- Data Cache ---------\n");
+        data.print_statistics();
+
+        printf("\n--------- Instruction Cache ---------\n");
+        instruction.print_statistics();
     }
     
     if (references)

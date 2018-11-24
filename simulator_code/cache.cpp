@@ -77,7 +77,8 @@ int cache::write(entry to_add, int new_mesi, int verbose)
             success = Sets[set_index]->write(to_add, new_mesi, verbose);
         else    // Set is empty, make a new one
         {
-            printf("Making new set with %d. and set index %d\n", associativity, set_index);
+            if (verbose == 2)
+                printf("Making new set with %d. and set index %d\n", associativity, set_index);
             Sets[set_index] = new set(associativity);
             success = Sets[set_index]->write(to_add, new_mesi, verbose);
         }
@@ -299,7 +300,7 @@ void cache::print_contents() const
         {
             if (Sets[i])
             {
-                printf("=======Set %d========\n", i);
+                printf("-------------------------Set %d------------------------\n", i);
                 Sets[i]->print_all_entries();
             }
         }

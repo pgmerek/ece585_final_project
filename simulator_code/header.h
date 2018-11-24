@@ -68,6 +68,7 @@ class cache
         int write(entry to_add, int new_mesi, int verbose);
         int clear (int verbose);
         void print_contents(void) const;
+        void print_statistics (void) const;
 
     private:
         // Number of...
@@ -82,7 +83,6 @@ class cache
         // Private functions
         int read_miss_handler(entry to_add, int verbose);
         int write_miss_handler(entry to_add, int verbose);
-        void print_all_sets(void) const;
 };
 
 class set
@@ -109,6 +109,9 @@ class set
         entry ** all_tags;   // All lines in the set
         int count;
         int associativity;
+        void print_all_tags(void) const;
+        void print_all_mesi(void) const;
+        void print_all_lru(void) const;
 };
 
 // Object for tag array/entry/line
@@ -140,7 +143,7 @@ class entry
         void populate_entry(int raw_addr, int verbose);
         int compare_entries(entry to_compare, int verbose) const;
         int invalidate_snoop(int verbose);
-        void print_entry(void) const;
+        
 
     private:
         bool empty;

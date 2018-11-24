@@ -162,15 +162,24 @@ int main(int argc, char * argv[])
             case 9: // Print contents and state of the cache
                 if (verbose == 2)
                     printf("Print contents request.=======\n");
-                printf("\n=========Data Cache Contents==========\n");
+                printf("\n==================== Data Cache Contents ===================\n");
+                printf("\nKey: LRU = 0 and MRU = 7\n");
                 data.print_contents();
-                printf("\n=========Instruction Cache Contents========\n");
+                printf("\n====================Instruction Cache Contents ===================\n");
+                printf("\nKey: LRU = 0 and MRU = 3\n");
                 instruction.print_contents();
                 break;
             default:
                 printf("Operation invalid. %d is not a valid operation. Exiting....\n", operation);
                 return -1;
         }
+
+        printf("\n==================== Summary Statistics for trace %d =================\n", k + 1);
+        printf("--------- Data Cache ---------\n");
+        data.print_statistics();
+
+        printf("\n--------- Instruction Cache ---------\n");
+        instruction.print_statistics();
     }
     
     if (references)

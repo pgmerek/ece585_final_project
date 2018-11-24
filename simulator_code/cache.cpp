@@ -77,7 +77,8 @@ int cache::write(entry to_add, int new_mesi, int verbose)
             success = Sets[set_index]->write(to_add, new_mesi, verbose);
         else    // Set is empty, make a new one
         {
-            printf("Making new set with %d. and set index %d\n", associativity, set_index);
+            if (verbose == 2)
+                printf("Making new set with %d. and set index %d\n", associativity, set_index);
             Sets[set_index] = new set(associativity);
             success = Sets[set_index]->write(to_add, new_mesi, verbose);
         }

@@ -47,6 +47,8 @@ int main(int argc, char * argv[])
 
         if (verbose == 2)
             printf("=======On case number %d, address %x. ", k, raw_address);
+        if (verbose == 1)
+            printf("\n==================== Messages to L2 for Trace %d =================\n", k);
         
         switch (operation)
         {
@@ -192,7 +194,7 @@ int main(int argc, char * argv[])
                 return -1;
         }
 
-        printf("\n==================== Summary Statistics for trace %d =================\n", k + 1);
+        printf("\n==================== Summary Statistics for Trace %d =================\n", k);
         printf("--------- Data Cache ---------\n");
         data.print_statistics();
 

@@ -238,7 +238,7 @@ void cache::print_contents() const
         {
             if (Sets[i])
             {
-                printf("=======Set %d========\n", i);
+                printf("--------Set %d-------\n", i);
                 Sets[i]->print_all_entries();
             }
         }

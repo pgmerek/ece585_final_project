@@ -246,13 +246,22 @@ void set::print_all_entries(void) const
 
 void set::print_all_tags() const
 {
-    printf("Tag: ");
+    printf("Tag:  ");
     for (int j = 0; j < associativity; ++j)
     {
         if (all_tags[j])
-            printf(" | %d |", all_tags[j]->get_tag());
+        {
+            if (all_tags[j]->get_tag() < 16)
+                printf("| %x         ", all_tags[j]->get_tag());
+            else if (all_tags[j]->get_tag() < 256 && all_tags[j]->get_tag()> 15)
+                printf("| %x        ", all_tags[j]->get_tag());
+            else if (all_tags[j]->get_tag() < 4096&& all_tags[j]->get_tag() > 255)
+                printf("| %x       ", all_tags[j]->get_tag());
+            else //This should never happen
+                printf( "Error: Tag is impossibly large");
+        }
     }
-    printf("\n");
+    printf("|\n");
  
 }
 void set::print_all_mesi() const
@@ -266,33 +275,33 @@ void set::print_all_mesi() const
             switch(all_tags[j]->get_mesi())
             {
                 case MODIFIED: 
-                    printf("| Modified |");
+                    printf("| Modified  ");
                     break;
                 case EXCLUSIVE:
-                    printf("| Exclusive |");
+                    printf("| Exclusive ");
                     break;
                 case SHARED:
-                    printf("| Shared |");
+                    printf("| Shared    ");
                     break;
                 case INVALID:
-                    printf("| Invalid |");
+                    printf("| Invalid   ");
                     break;
                 default: //should never happen
                     printf("Error: No Mesi bits");
             }
         }
     }
-    printf("\n");
+    printf("|\n");
 }
 
 
 void set::print_all_lru (void) const
 {
-    printf("LRU: ");
+    printf("LRU:  ");
     for (int j = 0; j < associativity; ++j)
     {
         if (all_tags[j])
-            printf(" | %d | ", all_tags[j]->get_lru());
+            printf("| %d         ", all_tags[j]->get_lru());
     }
-    printf("\n");
+    printf("|\n");
 }

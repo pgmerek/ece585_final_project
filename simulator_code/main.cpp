@@ -15,6 +15,7 @@ int main(int argc, char * argv[])
     int operation = -1;
     int raw_address = -1;
     traces * references = NULL;
+    cache_messages messages;
     entry temp_entry;
 
     if (argc == 3)
@@ -47,8 +48,6 @@ int main(int argc, char * argv[])
 
         if (verbose == 2)
             printf("=======On case number %d, address %x. ", k, raw_address);
-        if (verbose == 1)
-            printf("\n==================== Messages to L2 for Trace %d =================\n", k);
         
         switch (operation)
         {
@@ -158,20 +157,7 @@ int main(int argc, char * argv[])
                         printf("Hit\n");
                 }
                 else
-                {
                     data.increment_misses();
-                    /*
-                    if (!data.miss_handler(temp_entry, operation, verbose))
-                    {
-                        if (verbose ==2)
-                        printf("An error occured when reading from the data cache.\n");
-                    }
-                    else
-                    {
-                        if (verbose == 2)
-                            printf("Miss\n");
-                    }*/
-                }
                 break;
             case 8: // Clear cache and reset all statistics
                 if (verbose == 2)

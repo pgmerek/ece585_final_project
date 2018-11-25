@@ -34,6 +34,12 @@ using namespace std;
 #define MASK_FOR_INDEX 0x000FFFC0
 #define MASK_FOR_BYTE_OFFSET 0x0000003F
 
+struct node
+{
+    char * message;
+    node * next;
+};
+
 // Forward declare all classes
 class cache;
 class set;
@@ -125,9 +131,9 @@ class set
 class entry
 {
     public:
-        entry();
+        entry(void);
         entry(entry to_copy, int verbose);
-        ~entry();
+        ~entry(void);
         // Set functions
         void set_tag(int new_tag) { tag = new_tag; };
         void set_index(int new_index) { index = new_index; };
@@ -174,6 +180,20 @@ class traces
         int operation;
         bool has_address;   // False for when operation equal 8 or 9, true otherwise
         int address;
+};
+
+class cache_messages
+{
+    public:
+        cache_messages(void);
+        ~cache_messages(void);
+        void add_message(char * msg);
+        void delete_messages(void);         // Wrapper for the private delete_messages function
+        void display_messages(void) const;  // Wrapper for the private display_messages function
+    private:
+        node * head;
+        void delete_messages(node * head);
+        void display_messages(node * head) const;
 };
 
 int read_file(traces ** references, char * fileName, int verbose);

@@ -78,49 +78,13 @@ int set::contains(entry compare_to, int verbose)
 
     return result;
 }
-  
-int set::write(entry to_add, int verbose)
-{
-    int success = 0;
-    int index_to_insert = 0;
-    int lru_index = -1; // If the set is full, this is where we should write the new entry
-    if (all_tags)
-    {
-        // Try to find the first empty entry
-        while (all_tags[index_to_insert] && index_to_insert < associativity)
-            ++index_to_insert;
 
-        if (index_to_insert == associativity) // Set is full
-        {
-            if (verbose == 2)
-                printf("Set full. Evicting the lru and writing %x.\n", to_add.get_raw_address());
-            lru_index = evict();    // Find which entry to evict
-            if (all_tags[lru_index])    // Delete the lru
-            {
-                delete all_tags[lru_index];
-                all_tags[lru_index] = NULL;
-            }
-            index_to_insert = lru_index;    // We need to write location of the entry we evicted
-        }
-        else
-        {
-            if (verbose == 2)
-                printf("Set isn't full. No eviction need. Writing %x.\n", to_add.get_raw_address());
-        }
-
-        all_tags[index_to_insert] = new entry(to_add, verbose);
-        update_lru(index_to_insert, verbose);
-        success = 1;
-    }
-
-    return success;
-}
-
-int set::write(entry to_add, int new_mesi, int verbose)
+int set::write(entry to_add, int new_mesi, cache_messages & messages, int verbose)
 {
     int success = 0;
     int index_to_insert = 0;
     int lru_index = 0; // If the set is full, this is where we should write the new entry
+    char buffer[BUFFER_SIZE];
     if (all_tags)
     {
         // Try to find the first empty entry
@@ -136,6 +100,11 @@ int set::write(entry to_add, int new_mesi, int verbose)
             {
                 if (all_tags[lru_index])    // Delete the lru
                 {
+                    if (all_tags[lru_index]->get_mesi() == MODIFIED)
+                    {
+                        sprintf(buffer, "%s%x", WRITE_TO_L2, all_tags[lru_index]->get_raw_address());
+                        messages.add_message(buffer);
+                    }
                     delete all_tags[lru_index];
                     all_tags[lru_index] = NULL;
                 }

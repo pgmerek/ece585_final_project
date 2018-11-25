@@ -65,7 +65,7 @@ int cache::contains(entry compare_to, int verbose)
     return match;
 }
   
-int cache::write(entry to_add, int new_mesi, int verbose)
+int cache::write(entry to_add, int new_mesi, cache_messages & messages, int verbose)
 {
     int set_index = to_add.get_index();
     int success = 0; 
@@ -73,13 +73,13 @@ int cache::write(entry to_add, int new_mesi, int verbose)
     if (Sets)   // If the sets exist....
     {
         if (Sets[set_index])   // Set isn't empty
-            success = Sets[set_index]->write(to_add, new_mesi, verbose);
+            success = Sets[set_index]->write(to_add, new_mesi, messages, verbose);
         else    // Set is empty, make a new one
         {
             if (verbose == 2)
                 printf("Making new set with %d. and set index %d\n", associativity, set_index);
             Sets[set_index] = new set(associativity);
-            success = Sets[set_index]->write(to_add, new_mesi, verbose);
+            success = Sets[set_index]->write(to_add, new_mesi, messages, verbose);
         }
     }
     else    // Otherwise make it
@@ -89,7 +89,7 @@ int cache::write(entry to_add, int new_mesi, int verbose)
         for (int i = 0; i < NUM_SETS; ++i)
             Sets[i] = NULL;
         // Recursive call 
-        success = write(to_add, new_mesi, verbose);
+        success = write(to_add, new_mesi, messages, verbose);
     }
 
     return success;
@@ -153,20 +153,28 @@ int cache::reset_stats(int verbose)
 
 
 // if miss occurs
-int cache::miss_handler(entry to_add, int operation, int verbose)
+int cache::miss_handler(entry to_add, int operation, cache_messages & messages, int verbose)
 {
     int success = 0;
-    switch (operation)
+    char msg_buffer[BUFFER_SIZE];
+
+    // Send "read from L2" message
+    sprintf(msg_buffer, "%s%x", READ_FROM_L2, to_add.get_raw_address());
+    messages.add_message(msg_buffer);
+
+    if (operation == 1)
     {
-        case 0: // Data read
-            success = read_miss_handler(to_add, verbose);
-            break;
-        case 1: // Write
-            success = write_miss_handler(to_add, verbose);
-            break;
-        case 2: // Instruction read 
-            success = read_miss_handler(to_add, verbose);
-            break;
+        // Send "read for ownership from l2" message
+        sprintf(msg_buffer, "%s%x", RFO_FROM_L2, to_add.get_raw_address());
+        messages.add_message(msg_buffer);
+        success = write_miss_handler(to_add, messages, verbose);
+    }
+    else
+    {
+        // Send "read from L2" message
+        sprintf(msg_buffer, "%s%x", READ_FROM_L2, to_add.get_raw_address());
+        messages.add_message(msg_buffer);
+        success = read_miss_handler(to_add, messages, verbose);
     }
 
     return success;
@@ -174,7 +182,7 @@ int cache::miss_handler(entry to_add, int operation, int verbose)
 
 
 // handler for a read miss
-int cache::read_miss_handler(entry to_add, int verbose)
+int cache::read_miss_handler(entry to_add, cache_messages & messages, int verbose)
 {
     int success = 0;
     int tag = to_add.get_tag();
@@ -183,18 +191,20 @@ int cache::read_miss_handler(entry to_add, int verbose)
     {
         if (verbose)
             printf("Found entry in other cache, setting mesi to SHARED. This should never happen.\n");
-        success = write(to_add, SHARED, verbose);
+        success = write(to_add, SHARED, messages, verbose);
     }
     else    // Requested is not in other caches, write as exclusive
-        success = write(to_add, EXCLUSIVE, verbose);
+    {
+        success = write(to_add, EXCLUSIVE, messages, verbose);
+    }
 
 	return success;
 }
 
 
-int cache::write_miss_handler(entry to_add, int verbose)
+int cache::write_miss_handler(entry to_add, cache_messages & messages, int verbose)
 {
-    return write(to_add, MODIFIED, verbose);
+    return write(to_add, MODIFIED, messages, verbose);
 }
 
 
@@ -211,30 +221,46 @@ int cache::snoop(unsigned int tag) const
 
 
 // cache handler for read request
-int cache::read_request(entry to_add, int verbose) 
+int cache::read_request(entry to_add, cache_messages & messages, int verbose) 
 {
     int success = 0;
     int current_mesi = get_entry_mesi(to_add, verbose);
+    char buffer[BUFFER_SIZE];
     switch (current_mesi)
     {
         case MODIFIED:
+            if (verbose == 2)
+                printf("Hit\n");
             ++hits;
             success = set_entry_mesi(to_add, SHARED, verbose);
+            // Add return data to l2 message to the list of messages 
+            sprintf(buffer, "%s%x", RETURN_DATA_TO_L2, to_add.get_raw_address());
+            messages.add_message(buffer);
             break;
         case INVALID:
+            if (verbose == 2)
+                printf("Misses\n");
             ++misses;
             // Mesi stays INVALID
             success = 1;
             break;
         case SHARED:
+            if (verbose == 2)
+                printf("Hit\n");
             ++hits;
             // Mesi stays SHARED
             success = 1;
             break;
         case EXCLUSIVE:
+            if (verbose == 2)
+                printf("Hit\n");
             ++hits;
             success = set_entry_mesi(to_add, SHARED, verbose);
             break;
+        // This is commented out because we might not need to do this.
+        /*case default:   // Cache empty
+            sprintf(buffer, "%s%x", WRITE_TO_L2, to_add.get_raw_address());
+            messages.add_message(buffer);*/
     }
 	return success;
 }
@@ -259,7 +285,7 @@ int cache::get_entry_mesi(entry to_retrieve, int verbose) const
 // ensures that the entry exists before setting mesi
 int cache::set_entry_mesi(entry to_set, int new_mesi, int verbose) 
 {
-    int success = 0;
+    int success = -1;
     int set_index = to_set.get_index();
     
     if (Sets)

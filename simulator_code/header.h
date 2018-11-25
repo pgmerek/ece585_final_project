@@ -34,6 +34,12 @@ using namespace std;
 #define MASK_FOR_INDEX 0x000FFFC0
 #define MASK_FOR_BYTE_OFFSET 0x0000003F
 
+// Messages provided in project description
+const char RETURN_DATA_TO_L2 [] = "Return data to L2 ";
+const char WRITE_TO_L2 [] = "Write to L2 ";
+const char READ_FROM_L2 [] = "Read from L2 ";
+const char RFO_FROM_L2 [] = "Read for Ownership from L2 ";
+
 struct node
 {
     char * message;
@@ -44,6 +50,7 @@ struct node
 class cache;
 class set;
 class entry;
+class cache_messages;
 
 // Declare the necessary classes
 class cache
@@ -65,15 +72,17 @@ class cache
         void increment_misses(void) { ++misses; };
         // All others
         int invalidate_entry(entry invalid_entry, int verbose);
-        int read_request(entry to_add, int verbose);
-        int miss_handler(entry to_add, int operation, int verbose);
+        int read_request(entry to_add, cache_messages & messages, int verbose);
+        int miss_handler(entry to_add, int operation, cache_messages & messages, int verbose);
         int shared_memory(entry tag, int operation);
         int shared_snoop(entry tag, int operation);
         int modified_memory(entry tag, int operation);
         int snoop(unsigned int tag) const;
         int contains(entry compare_to, int verbose);
-        int write(entry to_add, int new_mesi, int verbose);
+        int write(entry to_add, int new_mesi, cache_messages & messages, int verbose);
         int clear (int verbose);
+        int get_entry_mesi(entry to_retrieve, int verbose) const;
+        int set_entry_mesi(entry to_set, int new_mesi, int verbose);
         void print_contents(void) const;
         void print_statistics (void) const;
 
@@ -88,10 +97,8 @@ class cache
         // Pointer to the sets in the cache
         set ** Sets;
         // Private functions
-        int read_miss_handler(entry to_add, int verbose);
-        int write_miss_handler(entry to_add, int verbose);
-        int get_entry_mesi(entry to_retrieve, int verbose) const;
-        int set_entry_mesi(entry to_set, int new_mesi, int verbose);
+        int read_miss_handler(entry to_add, cache_messages & messages, int verbose);
+        int write_miss_handler(entry to_add, cache_messages & messages, int verbose);
 };
 
 class set
@@ -109,8 +116,7 @@ class set
         int get_entry_mesi(entry to_retrieve, int verbose) const;
         // Other functions
         int read(unsigned int tag);
-        int write(entry to_add, int verbose);
-        int write(entry to_add, int new_mesi, int verbose);
+        int write(entry to_add, int new_mesi, cache_messages & messages, int verbose);
         int contains(entry compare_to, int verbose);
         int evict(void);
         int invalidate_snoop(entry to_invalidate, int verbose);

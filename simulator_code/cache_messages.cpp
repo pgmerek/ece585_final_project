@@ -57,6 +57,7 @@ void cache_messages::add_message(char * msg)
         // Copy message into dynamically allocated array
         head->message = new char[strlen(msg) + 1];
         strcpy(head->message, msg);
+        printf("Copied message to new head node.\n");
     }
     else    // If this is not the first message....
     {

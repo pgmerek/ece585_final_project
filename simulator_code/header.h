@@ -74,7 +74,7 @@ class cache
         int read_request(entry to_add, cache_messages & messages, int verbose);
         int miss_handler(entry to_add, int operation, cache_messages & messages, int verbose);
         int snoop(unsigned int tag) const;
-        int contains(entry compare_to, int verbose);
+        int contains(entry compare_to, int operation, int verbose);
         int write(entry to_add, int new_mesi, cache_messages & messages, int verbose);
         int clear (int verbose);
         int get_entry_mesi(entry to_retrieve, int verbose) const;
@@ -110,7 +110,7 @@ class set
         int get_entry_mesi(entry to_retrieve, int verbose) const;
         // Other functions
         int write(entry to_add, int new_mesi, cache_messages & messages, int verbose);
-        int contains(entry compare_to, int verbose);
+        int contains(entry compare_to, int operation, int verbose);
         int evict(void);
         int invalidate_snoop(entry to_invalidate, int verbose);
         void update_lru(int index, int verbose);

@@ -140,7 +140,7 @@ int set::write(entry to_add, int new_mesi, cache_messages & messages, int verbos
     return result;
 }
 
-int set::contains(entry compare_to, int verbose)
+int set::contains(entry compare_to, int operation, int verbose)
 {
     int result = MISS;
     if (all_tags)   // If the set exists
@@ -150,7 +150,19 @@ int set::contains(entry compare_to, int verbose)
         {
             if (all_tags[j] && all_tags[j]->compare_entries(compare_to, verbose))   // If entry exists and matches
             {
-                result = HIT;   
+                if (all_tags[j]->get_mesi() == INVALID) // If the entry is already in the cache but INVALID
+                {
+                    if (operation == 1) // Operation is a write
+                    {
+                        all_tags[j]->set_mesi(MODIFIED);    // Set it to MODIFIED
+                        result = HIT;
+                    }
+                    else    // Operation is a write
+                    {
+                        all_tags[j]->set_mesi(EXCLUSIVE);    // Set it to EXCLUSIVE 
+                        result = MISS;
+                    }
+                }
                 update_lru(j, verbose);     // Update lru of the matching entry since we used it
                 break;
             }

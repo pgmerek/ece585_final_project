@@ -57,7 +57,7 @@ int main(int argc, char * argv[])
                     printf("Read data request.=======\n");
                 data.increment_reads();
                 // If entry is in the data cache
-                if (data.contains(temp_entry, verbose))
+                if (data.contains(temp_entry, operation, verbose))
                 {
                     data.increment_hits();
                     if (verbose == 2)
@@ -92,7 +92,7 @@ int main(int argc, char * argv[])
                     printf("Write data request.=======\n");
                 data.increment_writes();
                 // If entry is in the data cache
-                if (data.contains(temp_entry, verbose))
+                if (data.contains(temp_entry, operation, verbose))
                 {
                     data.increment_hits();
                     if (verbose == 2)
@@ -127,7 +127,7 @@ int main(int argc, char * argv[])
                     printf("Read instruction request.=======\n");
                 instruction.increment_reads();
                 // If entry is in the instruction cache
-                if (instruction.contains(temp_entry, verbose))
+                if (instruction.contains(temp_entry, operation, verbose))
                 {
                     instruction.increment_hits();
                     if (verbose == 2)
@@ -160,10 +160,16 @@ int main(int argc, char * argv[])
                 if (verbose == 2)
                     printf("Invalidate from L2 request.=======\n");
 
-                if (!data.invalidate_entry(temp_entry, verbose)) // Invalidate it and capture return value
+                // Invalidate any matching entry in the data cache
+                if (!data.invalidate_entry(temp_entry, verbose))
                     data.increment_misses();
                 else
                     data.increment_hits();
+                // Invalidate any matching entry in the instruction cache
+                if (!instruction.invalidate_entry(temp_entry, verbose))
+                    instruction.increment_misses();
+                else
+                    instruction.increment_hits();
                 break;
             case 4: // Data request from L2
                 if (verbose == 2)

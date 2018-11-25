@@ -178,13 +178,13 @@ int cache::snoop(unsigned int tag) const
 	return false;
 }
 
-int cache::contains(entry compare_to, int verbose)
+int cache::contains(entry compare_to, int operation, int verbose)
 {
     int set_index = compare_to.get_index(); // Get the set index
     bool match = 0;
     
     if (Sets && Sets[set_index])   // If Sets exists and set isn't empty
-        match = Sets[set_index]->contains(compare_to, verbose); // Check if the entry is within the set
+        match = Sets[set_index]->contains(compare_to, operation, verbose); // Check if the entry is within the set
     
     return match;
 }

@@ -12,9 +12,9 @@ cache::cache(int assoc)
 	reads = 0;
 	writes = 0;
 	associativity = assoc;
-	//create sets of empty lines
+	// Create array of set pointers
 	Sets = new set * [NUM_SETS];
-	//Set each set to NULL
+	//Set each set pointer to NULL
 	for (int i = 0; i < NUM_SETS; ++i)
 		Sets[i] = NULL;
 }
@@ -26,120 +26,36 @@ cache::~cache()
     reads = 0;
     writes = 0;
     associativity = 0;
-    // Delete the array of sets
-    if (Sets)
+
+    if (Sets)   // If Sets exists
     {
-    // Delete each set
+        // Delete all sets
         for (int i = 0; i < NUM_SETS; ++i)
         {
-            if (Sets[i])
+            if (Sets[i])    // If the set exists, delete it
             {
                 delete Sets[i];
                 Sets[i] = NULL;
             }
         }
-    delete [] Sets;
+
+    delete [] Sets; // Delete the array of Sets
     Sets = NULL;
     }
 }
 
-int cache::contains(entry compare_to, int verbose)
+float cache::get_hit_miss_ratio() const
 {
-    int set_index = compare_to.get_index();
-    bool match = 0;
+    // Convert to float
+    float h = hits;
+    float m = misses;
+    if (!misses)    // Make sure we don't divide by zero
+        return 0;
     
-    if (Sets)
-    {
-
-        if (Sets[set_index])   // Set isn't empty
-            match = Sets[set_index]->contains(compare_to, verbose);
-    }
-    else
-    {
-        //create sets of empty lines
-        Sets = new set * [NUM_SETS];
-        //Set each set to NULL
-        for (int i = 0; i < NUM_SETS; ++i)
-            Sets[i] = NULL;
-    }
-    return match;
-}
-  
-int cache::write(entry to_add, int new_mesi, cache_messages & messages, int verbose)
-{
-    int set_index = to_add.get_index();
-    int success = 0; 
-
-    if (Sets)   // If the sets exist....
-    {
-        if (Sets[set_index])   // Set isn't empty
-            success = Sets[set_index]->write(to_add, new_mesi, messages, verbose);
-        else    // Set is empty, make a new one
-        {
-            if (verbose == 2)
-                printf("Making new set with %d. and set index %d\n", associativity, set_index);
-            Sets[set_index] = new set(associativity);
-            success = Sets[set_index]->write(to_add, new_mesi, messages, verbose);
-        }
-    }
-    else    // Otherwise make it
-    {
-        Sets = new set * [NUM_SETS];
-        //Set each set to NULL
-        for (int i = 0; i < NUM_SETS; ++i)
-            Sets[i] = NULL;
-        // Recursive call 
-        success = write(to_add, new_mesi, messages, verbose);
-    }
-
-    return success;
+    return h / m;   // Returns hits to misses as a float
 }
 
-
-//invalidate to_invalidate, if it exists
-int cache::invalidate_entry(entry to_invalidate, int verbose)
-{
-    int set_index = to_invalidate.get_index();
-    int success = ERROR;
-    
-    if (Sets)
-    {
-        if (Sets[set_index])   // Set isn't empty
-            success = Sets[set_index]->invalidate_snoop(to_invalidate, verbose);
-    }
-
-    return success;
-}
-
-
-
-// delate all entries in all sets and delete all sets in the cache
-int cache::clear(int verbose)
-{
-    reset_stats(verbose);
-    // Delete the array of sets
-    if (Sets)
-    {
-    // Delete each set
-        for (int i = 0; i < NUM_SETS; ++i)
-        {
-            if (Sets[i]) // delete each entry in the set
-            {
-                delete Sets[i];
-                Sets[i] = NULL;
-            }
-        }
-        if (verbose == 2)
-            printf("Sets Cleared.\n");
-
-        delete [] Sets;
-        Sets = NULL;
-    }
-    return 1;
-}
-
-// Set all cache stats to 0. Used when emptying the cache
-int cache::reset_stats(int verbose)
+void cache::reset_stats(int verbose)
 {	
     hits = 0;
     misses = 0;
@@ -148,79 +64,22 @@ int cache::reset_stats(int verbose)
 
     if (verbose == 2)
 	    printf("The cache has been cleared; Hits:%d Misses:%d Reads:%d Writes:%d\n", hits, misses, reads, writes);
-    return 1;
 }
 
-
-// if miss occurs
-int cache::miss_handler(entry to_add, int operation, cache_messages & messages, int verbose)
+int cache::invalidate_entry(entry to_invalidate, int verbose)
 {
+    int set_index = to_invalidate.get_index();
     int success = 0;
-    char msg_buffer[BUFFER_SIZE];
-
-    // Send "read from L2" message
-    sprintf(msg_buffer, "%s%x", READ_FROM_L2, to_add.get_raw_address());
-    messages.add_message(msg_buffer);
-
-    if (operation == 1)
+    
+    if (Sets)
     {
-        // Send "read for ownership from l2" message
-        sprintf(msg_buffer, "%s%x", RFO_FROM_L2, to_add.get_raw_address());
-        messages.add_message(msg_buffer);
-        success = write_miss_handler(to_add, messages, verbose);
-    }
-    else
-    {
-        // Send "read from L2" message
-        sprintf(msg_buffer, "%s%x", READ_FROM_L2, to_add.get_raw_address());
-        messages.add_message(msg_buffer);
-        success = read_miss_handler(to_add, messages, verbose);
+        if (Sets[set_index])   // Set isn't empty
+            success = Sets[set_index]->invalidate_snoop(to_invalidate, verbose);
     }
 
-    return success;
+    return success; // Returns either a 0 or 1 for failure or success, respectively
 }
 
-
-// handler for a read miss
-int cache::read_miss_handler(entry to_add, cache_messages & messages, int verbose)
-{
-    int success = 0;
-    int tag = to_add.get_tag();
-    // Check if tag is in other caches (this should never happen)
-    if (snoop(tag))
-    {
-        if (verbose)
-            printf("Found entry in other cache, setting mesi to SHARED. This should never happen.\n");
-        success = write(to_add, SHARED, messages, verbose);
-    }
-    else    // Requested is not in other caches, write as exclusive
-    {
-        success = write(to_add, EXCLUSIVE, messages, verbose);
-    }
-
-	return success;
-}
-
-
-int cache::write_miss_handler(entry to_add, cache_messages & messages, int verbose)
-{
-    return write(to_add, MODIFIED, messages, verbose);
-}
-
-
-// Every time we snoop to L2, it will always 
-// come back false because for this project
-// we will assume that anything that is not in the L1 
-// cache is not in the L2 cache
-// We will execute this every time we have a miss in the 
-// L1 cache
-int cache::snoop(unsigned int tag) const
-{
-	return false;
-}
-
-
-// cache handler for read request
 int cache::read_request(entry to_add, cache_messages & messages, int verbose) 
 {
     int success = 0;
@@ -257,22 +116,144 @@ int cache::read_request(entry to_add, cache_messages & messages, int verbose)
             ++hits;
             success = set_entry_mesi(to_add, SHARED, verbose);
             break;
-        // This is commented out because we might not need to do this.
-        /*case default:   // Cache empty
-            sprintf(buffer, "%s%x", WRITE_TO_L2, to_add.get_raw_address());
-            messages.add_message(buffer);*/
     }
+    return success; // Returns either a 0 or 1 for failure or success, respectively
+}
+
+int cache::miss_handler(entry to_add, int operation, cache_messages & messages, int verbose)
+{
+    int success = 0;
+    char msg_buffer[BUFFER_SIZE];
+
+    // Send "read from L2" message
+    sprintf(msg_buffer, "%s%x", READ_FROM_L2, to_add.get_raw_address());
+    messages.add_message(msg_buffer);
+
+    if (operation == 1) // Write miss
+    {
+        // Send "read for ownership from l2" message
+        sprintf(msg_buffer, "%s%x", RFO_FROM_L2, to_add.get_raw_address());
+        messages.add_message(msg_buffer);
+        success = write_miss_handler(to_add, messages, verbose);
+    }
+    else    // Read miss
+    {
+        // Send "read from L2" message
+        sprintf(msg_buffer, "%s%x", READ_FROM_L2, to_add.get_raw_address());
+        messages.add_message(msg_buffer);
+        success = read_miss_handler(to_add, messages, verbose);
+    }
+
+    return success; // Returns either a 0 or 1 for failure or success, respectively
+}
+
+int cache::read_miss_handler(entry to_add, cache_messages & messages, int verbose)
+{
+    int success = 0;
+    int tag = to_add.get_tag();
+    // Check if tag is in other caches (this should never happen)
+    if (snoop(tag))
+    {
+        if (verbose)
+            printf("Found entry in other cache, setting mesi to SHARED. This should never happen.\n");
+        success = write(to_add, SHARED, messages, verbose);
+    }
+    else    // Requested is not in other caches, write as exclusive
+    {
+        success = write(to_add, EXCLUSIVE, messages, verbose);
+    }
+
 	return success;
 }
 
-// safe method for accessing mesi for a specific entry
-// ensures that entry exists before retrieving mesi
+int cache::write_miss_handler(entry to_add, cache_messages & messages, int verbose)
+{
+    return write(to_add, MODIFIED, messages, verbose);
+}
+
+// We assume that a snoop to L2 will always be false
+// For this project we assume that anything not in L1 is also not in L2
+int cache::snoop(unsigned int tag) const
+{
+	return false;
+}
+
+int cache::contains(entry compare_to, int verbose)
+{
+    int set_index = compare_to.get_index(); // Get the set index
+    bool match = 0;
+    
+    if (Sets && Sets[set_index])   // If Sets exists and set isn't empty
+        match = Sets[set_index]->contains(compare_to, verbose); // Check if the entry is within the set
+    else
+    {
+        // Create sets of empty lines
+        Sets = new set * [NUM_SETS];
+        for (int i = 0; i < NUM_SETS; ++i)
+            Sets[i] = NULL;
+    }
+    return match;
+}
+  
+int cache::write(entry to_add, int new_mesi, cache_messages & messages, int verbose)
+{
+    int set_index = to_add.get_index();     // Get the set index
+    int success = 0; 
+
+    if (Sets)   // If the sets exist....
+    {
+        if (Sets[set_index])   // Set isn't empty
+            success = Sets[set_index]->write(to_add, new_mesi, messages, verbose);
+        else    // Set is empty, make a new one
+        {
+            if (verbose == 2)
+                printf("Making new set with %x. and set index %x\n", associativity, set_index);
+            Sets[set_index] = new set(associativity);
+            success = Sets[set_index]->write(to_add, new_mesi, messages, verbose);
+        }
+    }
+    else    // Otherwise, make it and call write again
+    {
+        Sets = new set * [NUM_SETS];
+        for (int i = 0; i < NUM_SETS; ++i)
+            Sets[i] = NULL;
+        // Recursive call now that the set exists
+        success = write(to_add, new_mesi, messages, verbose);
+    }
+
+    return success;
+}
+
+// Delete all entries in all sets and all sets in the cache
+int cache::clear(int verbose)
+{
+    reset_stats(verbose);
+    if (Sets)   // If Sets exists
+    {
+        for (int i = 0; i < NUM_SETS; ++i)  // Delete each entry in a set
+        {
+            if (Sets[i]) // If the set exists, delete it
+            {
+                delete Sets[i];
+                Sets[i] = NULL;
+            }
+        }
+        if (verbose == 2)
+            printf("Sets Cleared.\n");
+
+        delete [] Sets; // Delete the entire array
+        Sets = NULL;
+    }
+    return 1;
+}
+
+// Gets the mesi for a specific entry
 int cache::get_entry_mesi(entry to_retrieve, int verbose) const
 {
-    int mesi = -1;
+    int mesi = -1;  // Return ERROR if the entry is not found
     int set_index = to_retrieve.get_index();
     
-    if (Sets) //if the cache has sets
+    if (Sets)   // Make sure Sets exists
     {
         if (Sets[set_index])   // Set isn't empty
             mesi = Sets[set_index]->get_entry_mesi(to_retrieve, verbose);
@@ -280,15 +261,13 @@ int cache::get_entry_mesi(entry to_retrieve, int verbose) const
     return mesi;
 }
 
-
-// safe method for setting the mesi for a specific entry
-// ensures that the entry exists before setting mesi
+// Sets the mesi for a specific entry
 int cache::set_entry_mesi(entry to_set, int new_mesi, int verbose) 
 {
-    int success = -1;
+    int success = -1;   // Return ERROR if the entry is not found
     int set_index = to_set.get_index();
     
-    if (Sets)
+    if (Sets)   // Make sure Sets exists
     {
         if (Sets[set_index])   // Set isn't empty
             success = Sets[set_index]->set_entry_mesi(to_set, new_mesi, verbose);
@@ -296,15 +275,6 @@ int cache::set_entry_mesi(entry to_set, int new_mesi, int verbose)
     return success;
 }
 
-
-// prints all cache stats
-void cache::print_statistics (void) const
-{
-    printf(" Reads: %d\n Writes: %d\n Hits: %d\n Misses: %d\n Hit-Miss Ratio: %.2f\n", 
-            reads, writes, hits, misses, get_hit_miss_ratio());
-}
-
-// Print all the data in the cache
 void cache::print_contents() const
 {
      if (Sets) // if the cache has data
@@ -322,14 +292,9 @@ void cache::print_contents() const
         printf("Cache is empty");
 }
 
-// returns hit to miss ratio in decimal
-float cache::get_hit_miss_ratio() const
+void cache::print_statistics (void) const
 {
-    // Convert to float
-    float h = hits;
-    float m = misses;
-    if (!misses)    // Make sure we don't divide by zero
-        return 0;
-    
-    return h / m;
+    printf(" Reads: %d\n Writes: %d\n Hits: %d\n Misses: %d\n Hit-Miss Ratio: %.2f\n", 
+            reads, writes, hits, misses, get_hit_miss_ratio());
 }
+

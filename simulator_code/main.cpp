@@ -69,7 +69,7 @@ int main(int argc, char * argv[])
                     // Add it to the cache
                     if (!data.miss_handler(temp_entry, operation, messages, verbose))
                     {
-                        if (verbose ==2)
+                        if (verbose == 2)
                             printf("An error occured when reading from the data cache.\n");
                     }
                     else
@@ -163,18 +163,10 @@ int main(int argc, char * argv[])
                     printf("Invalidate from L2 request.=======\n");
                 // Need to search for an entry in the cache. if found, invalidate it.
                 // Refer to snoop diagram for logic on updating hits/misses and writing back to L2 (just a print statement)
-                switch(data.invalidate_entry(temp_entry, verbose)) // Invalidate it and capture return value
-                {
-                    case -1:    // The entry was not found when executing cache.invalidate_snoop
-                        printf("Entry not invalidated since it wasn't found in the cache.\n");
-                        break;
-                    case 0: // Invalidated from shared, invalid, or exclusive state. Don't increment hits
-                        data.increment_misses();
-                        break;
-                    case 1: // Only increment hits if invalidating from modified state
-                        data.increment_hits();
-                        break;
-                }
+                if (!data.invalidate_entry(temp_entry, verbose)) // Invalidate it and capture return value
+                    data.increment_misses();
+                else
+                    data.increment_hits();
                 break;
             case 4: // Data request from L2
                 if (verbose == 2)

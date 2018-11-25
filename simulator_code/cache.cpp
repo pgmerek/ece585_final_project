@@ -185,13 +185,7 @@ int cache::contains(entry compare_to, int verbose)
     
     if (Sets && Sets[set_index])   // If Sets exists and set isn't empty
         match = Sets[set_index]->contains(compare_to, verbose); // Check if the entry is within the set
-    else
-    {
-        // Create sets of empty lines
-        Sets = new set * [NUM_SETS];
-        for (int i = 0; i < NUM_SETS; ++i)
-            Sets[i] = NULL;
-    }
+    
     return match;
 }
   

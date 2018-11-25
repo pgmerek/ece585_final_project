@@ -58,7 +58,7 @@ class cache
         void increment_hits(void) { ++hits; };
         void increment_misses(void) { ++misses; };
         // All others
-        int invalidate_snoop(entry invalid_entry, int verbose);
+        int invalidate_entry(entry invalid_entry, int verbose);
         int read_request(entry to_add, int verbose);
         int miss_handler(entry to_add, int operation, int verbose);
         int shared_memory(entry tag, int operation);
@@ -70,7 +70,6 @@ class cache
         int clear (int verbose);
         void print_contents(void) const;
         void print_statistics (void) const;
-        void writeback(entry to_writeback, int verbose) const;
 
     private:
         // Number of...

@@ -1,9 +1,8 @@
 /* ECE 485/585 Fall Term 2018 Final Project
-                if (verbose == 2)
  * Split L1 Cache simulation, cache class functions
  * Members: Patrick Gmerek, Stephen Poanessa, Emma Smith, Amanda Voegtlin
  * 4 November 2018
- */
+*/
 
 #include "header.h"
 cache::cache(int assoc)
@@ -96,6 +95,25 @@ int cache::write(entry to_add, int new_mesi, int verbose)
     return success;
 }
 
+
+//invalidate to_invalidate, if it exists
+int cache::invalidate_entry(entry to_invalidate, int verbose)
+{
+    int set_index = to_invalidate.get_index();
+    int success = ERROR;
+    
+    if (Sets)
+    {
+        if (Sets[set_index])   // Set isn't empty
+            success = Sets[set_index]->invalidate_snoop(to_invalidate, verbose);
+    }
+
+    return success;
+}
+
+
+
+// delate all entries in all sets and delete all sets in the cache
 int cache::clear(int verbose)
 {
     reset_stats(verbose);
@@ -105,7 +123,7 @@ int cache::clear(int verbose)
     // Delete each set
         for (int i = 0; i < NUM_SETS; ++i)
         {
-            if (Sets[i])
+            if (Sets[i]) // delete each entry in the set
             {
                 delete Sets[i];
                 Sets[i] = NULL;
@@ -120,6 +138,7 @@ int cache::clear(int verbose)
     return 1;
 }
 
+// Set all cache stats to 0. Used when emptying the cache
 int cache::reset_stats(int verbose)
 {	
     hits = 0;
@@ -132,20 +151,8 @@ int cache::reset_stats(int verbose)
     return 1;
 }
 
-int cache::invalidate_snoop(entry to_invalidate, int verbose)
-{
-    int set_index = to_invalidate.get_index();
-    int success = ERROR;
-    
-    if (Sets)
-    {
-        if (Sets[set_index])   // Set isn't empty
-            success = Sets[set_index]->invalidate_snoop(to_invalidate, verbose);
-    }
 
-    return success;
-}
-
+// if miss occurs
 int cache::miss_handler(entry to_add, int operation, int verbose)
 {
     int success = 0;
@@ -165,6 +172,45 @@ int cache::miss_handler(entry to_add, int operation, int verbose)
     return success;
 }
 
+
+// handler for a read miss
+int cache::read_miss_handler(entry to_add, int verbose)
+{
+    int success = 0;
+    int tag = to_add.get_tag();
+    // Check if tag is in other caches (this should never happen)
+    if (snoop(tag))
+    {
+        if (verbose)
+            printf("Found entry in other cache, setting mesi to SHARED. This should never happen.\n");
+        success = write(to_add, SHARED, verbose);
+    }
+    else    // Requested is not in other caches, write as exclusive
+        success = write(to_add, EXCLUSIVE, verbose);
+
+	return success;
+}
+
+
+int cache::write_miss_handler(entry to_add, int verbose)
+{
+    return write(to_add, MODIFIED, verbose);
+}
+
+
+// Every time we snoop to L2, it will always 
+// come back false because for this project
+// we will assume that anything that is not in the L1 
+// cache is not in the L2 cache
+// We will execute this every time we have a miss in the 
+// L1 cache
+int cache::snoop(unsigned int tag) const
+{
+	return false;
+}
+
+
+// cache handler for read request
 int cache::read_request(entry to_add, int verbose) 
 {
     int success = 0;
@@ -173,7 +219,6 @@ int cache::read_request(entry to_add, int verbose)
     {
         case MODIFIED:
             ++hits;
-            writeback(to_add, verbose);
             success = set_entry_mesi(to_add, SHARED, verbose);
             break;
         case INVALID:
@@ -191,16 +236,17 @@ int cache::read_request(entry to_add, int verbose)
             success = set_entry_mesi(to_add, SHARED, verbose);
             break;
     }
-
 	return success;
 }
 
+// safe method for accessing mesi for a specific entry
+// ensures that entry exists before retrieving mesi
 int cache::get_entry_mesi(entry to_retrieve, int verbose) const
 {
     int mesi = -1;
     int set_index = to_retrieve.get_index();
     
-    if (Sets)
+    if (Sets) //if the cache has sets
     {
         if (Sets[set_index])   // Set isn't empty
             mesi = Sets[set_index]->get_entry_mesi(to_retrieve, verbose);
@@ -208,6 +254,9 @@ int cache::get_entry_mesi(entry to_retrieve, int verbose) const
     return mesi;
 }
 
+
+// safe method for setting the mesi for a specific entry
+// ensures that the entry exists before setting mesi
 int cache::set_entry_mesi(entry to_set, int new_mesi, int verbose) 
 {
     int success = 0;
@@ -221,84 +270,22 @@ int cache::set_entry_mesi(entry to_set, int new_mesi, int verbose)
     return success;
 }
 
-void cache::writeback(entry to_writeback, int verbose) const
-{
-    if (verbose == 1)
-        printf("Return data to L2 %x\n", to_writeback.get_raw_address());
-}
 
-int cache::read_miss_handler(entry to_add, int verbose)
-{
-    int success = 0;
-    int tag = to_add.get_tag();
-    // Check if tag is in other caches (this should never happen)
-    if (snoop(tag))
-    {
-        if (verbose)
-            printf("Found entry in other cache, setting mesi to SHARED. This should never happen.\n");
-        success = write(to_add, SHARED, verbose);
-    }
-    else    // Requested is not in other caches, write as exclusive
-    {
-        success = write(to_add, EXCLUSIVE, verbose);
-    }
-
-	return success;
-}
-
-int cache::write_miss_handler(entry to_add, int verbose)
-{
-    return write(to_add, MODIFIED, verbose);
-}
-
-// Transition handlers for lines that are Shared
-int cache::shared_memory(entry tag, int operation)
-{
-	// read
-	if (operation == 0)
-		tag.set_tag(SHARED);
-	// write
-	// also need to send a write command to the L2 cache
-	else if (operation == 1)
-		tag.set_tag(MODIFIED);
-	return 1;
-
-}
-
-int cache::shared_snoop(entry tag, int operation)
-{
-	// if L2 cache said to invalidate this line
-	if (operation == 3)
-		tag.set_tag(INVALID);
-	// if L2 is reading a line that is already shared
-	else if (operation == 4)
-		tag.set_tag(SHARED);
-	return 1;
-}
-// Every time we snoop to L2, it will always 
-// come back false because for this project
-// we will assume that anything that is not in the L1 
-// cache is not in the L2 cache
-// We will execute this every time we have a miss in the 
-// L1 cache
-int cache::snoop(unsigned int tag) const
-{
-	return false;
-}
-
+// prints all cache stats
 void cache::print_statistics (void) const
 {
     printf(" Reads: %d\n Writes: %d\n Hits: %d\n Misses: %d\n Hit-Miss Ratio: %.2f\n", 
             reads, writes, hits, misses, get_hit_miss_ratio());
 }
 
+// Print all the data in the cache
 void cache::print_contents() const
 {
-     if (Sets)
+     if (Sets) // if the cache has data
     {
         for (int i = 0; i < NUM_SETS; ++i)
         {
-            if (Sets[i])
+            if (Sets[i]) //print out the contents of every set
             {
                 printf("-------------------------Set %d------------------------\n", i);
                 Sets[i]->print_all_entries();
@@ -307,9 +294,9 @@ void cache::print_contents() const
     }
     else
         printf("Cache is empty");
-
 }
 
+// returns hit to miss ratio in decimal
 float cache::get_hit_miss_ratio() const
 {
     // Convert to float
@@ -320,4 +307,3 @@ float cache::get_hit_miss_ratio() const
     
     return h / m;
 }
-

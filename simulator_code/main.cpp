@@ -70,7 +70,7 @@ int main(int argc, char * argv[])
                     if (!data.miss_handler(temp_entry, operation, messages, verbose))
                     {
                         if (verbose ==2)
-                        printf("An error occured when reading from the data cache.\n");
+                            printf("An error occured when reading from the data cache.\n");
                     }
                     else
                     {

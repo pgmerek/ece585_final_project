@@ -95,7 +95,7 @@ int set::write(entry to_add, int new_mesi, cache_messages & messages, int verbos
     if (all_tags)   // If the set exists (is not empty)
     {
         // Try to find the first empty entry
-        while (all_tags[index_to_insert] && index_to_insert < associativity)
+        while (index_to_insert < associativity && all_tags[index_to_insert])
             ++index_to_insert;
 
         if (index_to_insert == associativity) // Set is full

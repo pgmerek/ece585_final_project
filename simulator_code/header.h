@@ -190,3 +190,4 @@ class cache_messages
 };
 
 int read_file(traces ** references, char * fileName, int verbose);
+

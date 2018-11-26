@@ -1,11 +1,11 @@
 ==Verbose is 0===
 -----Data Cache ------
---Set 5670 ---
+--Set 1159 ---
 Tag:  | afe | 243  | 398 | 834 | 485 | 457 | 371 | d9e |
 MESI: |  E  |  E   | E   | E   |  E  |  E  |  E  | E   |
 LRU:  | 7   | 3    | 0   | 1   |  2  | 4   |  5  | 6   |
 
-===Verbose  is 1===
+===Verbose is 1===
 ---L2 Messages---
 Read from 12345678
 Read from 24345678

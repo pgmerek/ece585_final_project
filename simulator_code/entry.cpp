@@ -90,36 +90,35 @@ int entry::compare_entries(entry to_compare, int verbose) const
 // This is is the invalidate for snoop 
 int entry::invalidate_snoop(int verbose)
 {
-    int success = 0;
+    int result = DO_NOTHING;
     // Invalidating is different for each current mesi state
     switch (mesi)
     {
         case MODIFIED:  // Increment hits and writeback to L2
             mesi = INVALID;
-            success = 1;
-            if (verbose)
+            result = HIT;
+            if (verbose == 2)
                 printf("%x has been changed from modified to invalid.\n", raw_address);
-            //printf("Writing %x back to L2 cache and invalidating entry in L1.\n", raw_address);
             break;
-        case INVALID:   // Do nothing
-            if (verbose)
+        case INVALID:   // Increment misses 
+            if (verbose == 2)
                 printf("%x has been changed from invalid to invalid.\n", raw_address);
-            success = 1;
+            result = MISS;
             break;
         case SHARED:    // Invalidate, but don't increment hits or writes
             mesi = INVALID;
-            if (verbose)
+            if (verbose == 2)
                 printf("%x has been changed from shared to invalid.\n", raw_address);
-            success = 1;
+            result = DO_NOTHING;
             break;
         case EXCLUSIVE: // Invalidate, but don't increment hits or writes
             mesi = INVALID;
-            if (verbose)
+            if (verbose == 2)
                 printf("%x has been changed from exclusive to invalid.\n", raw_address);
-            success = 1;
+            result = DO_NOTHING;
             break;
     }
 
-    return success;
+    return result;
 }
 

@@ -113,7 +113,7 @@ int main(int argc, char * argv[])
                         printf("An error occured when writing to the data cache.\n");
                     }
                     // Write through the first line if the cache is empty
-                    if (data.get_misses() == 0 && data.get_hits() == 0)
+                    if (data.get_misses() == 1 && data.get_hits() == 0)
                     {
                         // Add return data to L2 message to the list of messages 
                         sprintf(msg_buffer, "%s%x", WRITE_TO_L2, temp_entry.get_raw_address());
@@ -160,11 +160,11 @@ int main(int argc, char * argv[])
                     printf("Invalidate from L2 request.=======\n");
 
                 // Invalidate any matching entry in the data cache
-                if (!data.invalidate_entry(temp_entry, verbose))    // If there's no matching entry to invalidate, increment misses. This should never happen
-                    data.increment_misses();
+                if (!data.invalidate_entry(temp_entry, messages, verbose))
+                    printf("Could not invalidate %x in the data cache because it's not there.\n", temp_entry.get_raw_address());
                 // Invalidate any matching entry in the instruction cache
-                if (!instruction.invalidate_entry(temp_entry, verbose))    // If there's no matching entry to invalidate, increment misses. This should never happen
-                    instruction.increment_misses();
+                if (!instruction.invalidate_entry(temp_entry, messages, verbose))
+                    printf("Could not invalidate %x in the instruction cache because it's not there.\n", temp_entry.get_raw_address());
                 break;
             case 4: // Data request from L2
                 if (verbose == 2)

@@ -1,0 +1,3 @@
+When running test file, there are 2 items with the same tag in the cache.
+    - No hits when there should be a hit
+    - One item is missing from the cache

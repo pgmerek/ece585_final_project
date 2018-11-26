@@ -1,4 +1,14 @@
----Verbose = 0----
+===Verbose is 0===
 Tag:  | afe | 243  | 398 | 834 | 485 | 457 | 371 | d9e |
 MESI: |  E  |  E   | E   | E   |  E  |  E  |  E  | E   |
 LRU:  | 7   | 3    | 0   | 1   |  2  | 4   |  5  | 6   |
+
+===Verbose  is 1===
+---Contents---
+Tag:  | afe | 243  | 398 | 834 | 485 | 457 | 371 | d9e |
+MESI: |  E  |  E   | E   | E   |  E  |  E  |  E  | E   |
+LRU:  | 7   | 3    | 0   | 1   |  2  | 4   |  5  | 6   |
+
+---L2 Messages---
+
+

@@ -193,7 +193,7 @@ int set::evict()
  
 int set::invalidate_snoop(entry to_invalidate, int verbose)
 {
-    int success = 0; // If it doesn't find anything to invalidate, return 0
+    int result = ERROR; // If it doesn't find anything to invalidate, return ERROR
     if (all_tags)
     {
         // Search for a matching entry
@@ -201,13 +201,13 @@ int set::invalidate_snoop(entry to_invalidate, int verbose)
         {
             if (all_tags[j] && all_tags[j]->compare_entries(to_invalidate, verbose))    // If entry exists and the entry matches
             {
-                success = all_tags[j]->invalidate_snoop(verbose);    // Invalidate the entry
+                result = all_tags[j]->invalidate_snoop(verbose);    // Invalidate the entry
                 update_lru(j, verbose);     // Updated lru
                 break;
             }
         }
     }
-    return success; // Returns either a 0 or 1 for failure or success, respectively
+    return result;
 }       
 
 void set::update_lru(int entry_index, int verbose)     // Index is this context is NOT the same set index. This index just tells the function where the new entry is in the set

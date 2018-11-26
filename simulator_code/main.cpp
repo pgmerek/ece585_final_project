@@ -113,7 +113,7 @@ int main(int argc, char * argv[])
                         printf("An error occured when writing to the data cache.\n");
                     }
                     // Write through the first line if the cache is empty
-                    if (data.get_misses() == 0 && data.get_hits() == 0)
+                    if (data.get_misses() == 1 && data.get_hits() == 0)
                     {
                         // Add return data to L2 message to the list of messages 
                         sprintf(msg_buffer, "%s%x", WRITE_TO_L2, temp_entry.get_raw_address());

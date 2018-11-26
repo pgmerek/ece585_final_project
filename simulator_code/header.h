@@ -22,6 +22,7 @@ using namespace std;
 #define BUFFER_SIZE 256
 #define HIT 1
 #define MISS 0
+#define DO_NOTHING 2
 #define ERROR -1
 // Define the MESI States
 #define MODIFIED 0
@@ -70,7 +71,7 @@ class cache
         void increment_misses(void) { ++misses; };
         void reset_stats(int verbose);
         // All others
-        int invalidate_entry(entry invalid_entry, int verbose);
+        int invalidate_entry(entry invalid_entry, cache_messages & messages, int verbose);
         int read_request(entry to_add, cache_messages & messages, int verbose);
         int miss_handler(entry to_add, int operation, cache_messages & messages, int verbose);
         int snoop(unsigned int tag) const;

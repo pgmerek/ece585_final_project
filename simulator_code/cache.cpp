@@ -66,18 +66,36 @@ void cache::reset_stats(int verbose)
 	    printf("The cache has been cleared; Hits:%d Misses:%d Reads:%d Writes:%d\n", hits, misses, reads, writes);
 }
 
-int cache::invalidate_entry(entry to_invalidate, int verbose)
+int cache::invalidate_entry(entry to_invalidate, cache_messages & messages, int verbose)
 {
     int set_index = to_invalidate.get_index();
-    int success = 0;
+    int result = 0;
+    char buffer[BUFFER_SIZE];
     
     if (Sets)
     {
         if (Sets[set_index])   // Set isn't empty
-            success = Sets[set_index]->invalidate_snoop(to_invalidate, verbose);
+        {
+            switch (Sets[set_index]->invalidate_snoop(to_invalidate, verbose))
+            {
+                case HIT:
+                    sprintf(buffer, "%s%x", WRITE_TO_L2, to_invalidate.get_raw_address());
+                    messages.add_message(buffer);
+                    ++hits;
+                    result = 1;
+                    break;
+                case MISS:
+                    ++misses;
+                    result = 1;
+                    break;
+                case DO_NOTHING:
+                    result = 1;
+                    break;
+            }
+        }
     }
 
-    return success; // Returns either a 0 or 1 for failure or success, respectively
+    return result; // Returns either a failure or success, respectively
 }
 
 int cache::read_request(entry to_add, cache_messages & messages, int verbose) 

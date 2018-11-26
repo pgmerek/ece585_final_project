@@ -95,6 +95,9 @@ int main(int argc, char * argv[])
                 if (data.contains(temp_entry, operation, verbose))
                 {
                     data.increment_hits();
+                    // Write back to L2 on hit
+                    sprintf(msg_buffer, "%s%x", WRITE_TO_L2, temp_entry.get_raw_address());
+                    messages.add_message(msg_buffer);
                     if (verbose == 2)
                         printf("Hit\n");
                 }

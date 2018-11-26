@@ -163,6 +163,8 @@ int set::contains(entry compare_to, int operation, int verbose)
                         result = MISS;
                     }
                 }
+                else
+                    result = HIT;
                 update_lru(j, verbose);     // Update lru of the matching entry since we used it
                 break;
             }

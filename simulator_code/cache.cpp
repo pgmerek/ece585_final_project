@@ -277,7 +277,7 @@ void cache::print_contents() const
         {
             if (Sets[i]) //print out the contents of every set
             {
-                printf("-------------------------Set %d------------------------\n", i);
+                printf("-------------------------Set %x------------------------\n", i);
                 Sets[i]->print_all_entries();
             }
         }

@@ -77,13 +77,11 @@ int main(int argc, char * argv[])
                             printf("An error occured when reading from the data cache.\n");
                     }
                     // Write through the first line if the cache is empty
-                    if (data.get_misses() == 0 && data.get_hits() == 0)
+                    if (data.get_misses() == 1 && data.get_hits() == 0)
                     {
                         // Add return data to L2 message to the list of messages 
                         sprintf(msg_buffer, "%s%x", WRITE_TO_L2, temp_entry.get_raw_address());
                         messages.add_message(msg_buffer);
-                        if (data.set_entry_mesi(temp_entry, SHARED, verbose) == -1)
-                            printf("An error occured when setting the mesi state of the first entry to SHARED.\n");
                     }
                 }
                 break;
@@ -95,6 +93,9 @@ int main(int argc, char * argv[])
                 if (data.contains(temp_entry, operation, verbose))
                 {
                     data.increment_hits();
+                    // Write back to L2 on hit
+                    sprintf(msg_buffer, "%s%x", WRITE_TO_L2, temp_entry.get_raw_address());
+                    messages.add_message(msg_buffer);
                     if (verbose == 2)
                         printf("Hit\n");
                 }
@@ -146,13 +147,11 @@ int main(int argc, char * argv[])
                             printf("An error occured when reading from the instruction cache.\n");
                     }
                      // Write through first line if the cache is empty
-                    if (instruction.get_misses() == 0 && instruction.get_hits() == 0)
+                    if (instruction.get_misses() == 1 && instruction.get_hits() == 0)
                     {
                         // Add return data to L2 message to the list of messages 
                         sprintf(msg_buffer, "%s%x", WRITE_TO_L2, temp_entry.get_raw_address());
                         messages.add_message(msg_buffer);
-                        if (instruction.set_entry_mesi(temp_entry, SHARED, verbose) == -1)
-                            printf("An error occured when setting the mesi state of the first entry to SHARED.\n");
                     }
                 }
                 break;
@@ -161,15 +160,11 @@ int main(int argc, char * argv[])
                     printf("Invalidate from L2 request.=======\n");
 
                 // Invalidate any matching entry in the data cache
-                if (!data.invalidate_entry(temp_entry, verbose))    // If there's no matching entry to invalidate, increment misses
+                if (!data.invalidate_entry(temp_entry, verbose))    // If there's no matching entry to invalidate, increment misses. This should never happen
                     data.increment_misses();
-                else    // Else, increment hits
-                    data.increment_hits();  
                 // Invalidate any matching entry in the instruction cache
-                if (!instruction.invalidate_entry(temp_entry, verbose))    // If there's no matching entry to invalidate, increment misses
+                if (!instruction.invalidate_entry(temp_entry, verbose))    // If there's no matching entry to invalidate, increment misses. This should never happen
                     instruction.increment_misses();
-                else    // Else, increment hits
-                    instruction.increment_hits();
                 break;
             case 4: // Data request from L2
                 if (verbose == 2)

@@ -125,10 +125,6 @@ int cache::miss_handler(entry to_add, int operation, cache_messages & messages, 
     int success = 0;
     char msg_buffer[BUFFER_SIZE];
 
-    // Send "read from L2" message
-    sprintf(msg_buffer, "%s%x", READ_FROM_L2, to_add.get_raw_address());
-    messages.add_message(msg_buffer);
-
     if (operation == 1) // Write miss
     {
         // Send "read for ownership from l2" message
@@ -277,7 +273,7 @@ void cache::print_contents() const
         {
             if (Sets[i]) //print out the contents of every set
             {
-                printf("-------------------------Set %d------------------------\n", i);
+                printf("-------------------------Set %x------------------------\n", i);
                 Sets[i]->print_all_entries();
             }
         }

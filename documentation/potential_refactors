@@ -1,0 +1,3 @@
+-Add handlers for each operation in main to reduce switch case size
+-Order functions in cpp files to match header
+-remove unnecessary function prototypes

@@ -177,18 +177,22 @@ int set::contains(entry compare_to, int operation, int verbose)
 int set::evict()
 {
     // If not found, return error 
-    int result = ERROR;
+    int lru = ERROR;
+    int invalid = ERROR;
     // Search for the lru 
     for(int j = 0; j < associativity; ++j)
     {
-        if(all_tags[j] && all_tags[j]->get_lru() == 0)  // Lru is 0, mru is 7
-        {
-            result = j; // Capture the index within the set of the entry that will be evicted
-            break;
-        }
+        // Check for Invalid line
+        if (all_tags[j] && all_tags[j]->get_mesi() == INVALID)
+            invalid = j;  // If invalid, save index to evict
+        else if(all_tags[j] && all_tags[j]->get_lru() == 0)  // Lru is 0, mru is 7
+            lru = j; // Capture the index within the set of the entry that will be evicted
     }
-
-    return result;
+    
+    if (invalid != ERROR) // If there is an invalid line
+        return invalid;
+    else                 // If there is no invalid line
+        return lru;
 }
  
 int set::invalidate_snoop(entry to_invalidate, int verbose)

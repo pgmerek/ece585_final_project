@@ -118,8 +118,6 @@ int main(int argc, char * argv[])
                         // Add return data to L2 message to the list of messages 
                         sprintf(msg_buffer, "%s%x", WRITE_TO_L2, temp_entry.get_raw_address());
                         messages.add_message(msg_buffer);
-                        if (data.set_entry_mesi(temp_entry, SHARED, verbose) == -1)
-                            printf("An error occured when setting the mesi state of the first entry to SHARED.\n");
                     }
                 }
                 break;
@@ -186,6 +184,11 @@ int main(int argc, char * argv[])
             case 9: // Print contents and state of the cache
                 if (verbose == 2)
                     printf("Print contents request.=======\n");
+                printf("\n==================== Summary Statistics =================\n");
+                printf("--------- Data Cache ---------\n");
+                data.print_statistics();
+                printf("\n--------- Instruction Cache ---------\n");
+                instruction.print_statistics();
                 printf("\n======================== Data Cache Contents =======================\n");
                 printf("\nKey: LRU = 0 and MRU = 7\n");
                 data.print_contents();
@@ -203,12 +206,7 @@ int main(int argc, char * argv[])
                 return -1;
         }
 
-        printf("\n==================== Summary Statistics for Trace %d =================\n", k);
-        printf("--------- Data Cache ---------\n");
-        data.print_statistics();
-        printf("\n--------- Instruction Cache ---------\n");
-        instruction.print_statistics();
-    }
+            }
     
     if (references)
         delete [] references;

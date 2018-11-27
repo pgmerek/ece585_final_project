@@ -90,6 +90,10 @@ int set::write(entry to_add, int new_mesi, cache_messages & messages, int verbos
     int result = 0;
     int index_to_insert = 0;    // This is where the new entry will be added
     int lru_index = 0; // If the set is full, this is where we should write the new entry
+    // Retain old lru because we need to decrement the entries that
+    // are more recent than the one we replace. Only used if set is full
+    int old_lru = 0;
+    bool invalid_entry_evicted = false;
     char buffer[BUFFER_SIZE];
 
     if (all_tags)   // If the set exists (is not empty)
@@ -107,6 +111,10 @@ int set::write(entry to_add, int new_mesi, cache_messages & messages, int verbos
             {
                 if (all_tags[lru_index])    // Delete the lru
                 {
+                    old_lru = all_tags[lru_index]->get_lru();
+                    if (old_lru != 0)
+                        invalid_entry_evicted = true;
+
                     if (all_tags[lru_index]->get_mesi() == MODIFIED)    // Write back to L2 if entry that is evicted is MODIFIED
                     {
                         sprintf(buffer, "%s%x", WRITE_TO_L2, all_tags[lru_index]->get_raw_address());
@@ -131,7 +139,10 @@ int set::write(entry to_add, int new_mesi, cache_messages & messages, int verbos
         {
             all_tags[index_to_insert] = new entry(to_add, verbose);
             all_tags[index_to_insert]->set_mesi(new_mesi);
-            update_lru(index_to_insert, verbose);
+            if (invalid_entry_evicted)
+                update_lru(index_to_insert, old_lru, verbose);
+            else
+                update_lru(index_to_insert, verbose);
             result = 1;
         }
     }
@@ -175,23 +186,27 @@ int set::contains(entry compare_to, int operation, int verbose)
 
 int set::evict()
 {
-    // If not found, return error 
-    int lru = ERROR;
-    int invalid = ERROR;
+    // This is where the actual lru is. If we don't find an invalid entry, return this
+    int least_recently_used_entry = ERROR; 
+    int invalid_entry = -1;  // This is where any invalid entry is, if it exists
+
     // Search for the lru 
     for(int j = 0; j < associativity; ++j)
     {
-        // Check for Invalid line
-        if (all_tags[j] && all_tags[j]->get_mesi() == INVALID)
-            invalid = j;  // If invalid, save index to evict
-        else if(all_tags[j] && all_tags[j]->get_lru() == 0)  // Lru is 0, mru is 7
-            lru = j; // Capture the index within the set of the entry that will be evicted
+        if (all_tags[j])
+        {
+            if (all_tags[j]->get_lru() == 0)  // Lru is 0, mru is 7
+                least_recently_used_entry = j; // Capture the index within the set of the least recently used entry 
+                
+            if (all_tags[j]->get_mesi() == INVALID)
+                invalid_entry = j;
+        }
     }
-    
-    if (invalid != ERROR) // If there is an invalid line
-        return invalid;
-    else                 // If there is no invalid line
-        return lru;
+
+    if (invalid_entry != -1)
+        return invalid_entry;
+
+    return least_recently_used_entry;
 }
  
 int set::invalidate_snoop(entry to_invalidate, int verbose)
@@ -212,6 +227,23 @@ int set::invalidate_snoop(entry to_invalidate, int verbose)
     }
     return result;
 }       
+
+
+void set::update_lru(int entry_index, int old_lru, int verbose)     // Index is this context is NOT the same set index. This index just tells the function where the new entry is in the set
+{
+    for (int k = 0; k < associativity; ++k)
+    {
+        if (k == entry_index)   // Set the new entry to the MRU
+        {
+            all_tags[k]->set_lru(associativity - 1);
+            if (verbose == 2)
+                printf("Setting lru of %x to %d.\n", all_tags[entry_index]->get_tag(), associativity - 1);
+        }
+        // Decrement all other that were newer than the previous entry
+        else if (all_tags[k] && all_tags[k]->get_lru() > old_lru)
+            all_tags[k]->dec_lru(verbose);
+    }
+}
 
 void set::update_lru(int entry_index, int verbose)     // Index is this context is NOT the same set index. This index just tells the function where the new entry is in the set
 {

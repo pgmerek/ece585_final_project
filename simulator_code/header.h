@@ -115,6 +115,7 @@ class set
         int evict(void);
         int invalidate_snoop(entry to_invalidate, int verbose);
         void update_lru(int index, int verbose);
+        void update_lru(int index, int old_lru, int verbose);
         void print_all_entries(void) const;
 
     private:

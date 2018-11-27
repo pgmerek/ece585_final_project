@@ -158,10 +158,10 @@ int main(int argc, char * argv[])
                     printf("Invalidate from L2 request.=======\n");
 
                 // Invalidate any matching entry in the data cache
-                if (!data.invalidate_entry(temp_entry, messages, verbose))
+                if (!data.invalidate_entry(temp_entry, messages, verbose) && verbose == 2)
                     printf("Could not invalidate %x in the data cache because it's not there.\n", temp_entry.get_raw_address());
                 // Invalidate any matching entry in the instruction cache
-                if (!instruction.invalidate_entry(temp_entry, messages, verbose))
+                if (!instruction.invalidate_entry(temp_entry, messages, verbose) && verbose == 2)
                     printf("Could not invalidate %x in the instruction cache because it's not there.\n", temp_entry.get_raw_address());
                 break;
             case 4: // Data request from L2

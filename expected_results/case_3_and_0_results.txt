@@ -18,14 +18,15 @@ Read from ddd12345
 Read from eee12345
 Read from fff12345 
 Read from 11112345
+Read from 22212345
 Read from 33312345
 
 ===Summary Statistics (End of test)===
 ---Data----
-Reads: 10
+Reads: 9 
 Writes: 0
 Hits: 0
-Misses: 10
+Misses: 9 
 H/M: 0
 ---Instruction---
 Reads: 0

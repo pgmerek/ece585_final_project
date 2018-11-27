@@ -100,10 +100,9 @@ int set::write(entry to_add, int new_mesi, cache_messages & messages, int verbos
 
         if (index_to_insert == associativity) // Set is full
         {
-            if (verbose == 2)
-                printf("Set full. Evicting the lru and writing %x.\n", to_add.get_raw_address());
-
             lru_index = evict();    // Find which entry to evict
+            if (verbose == 2)
+                printf("LRU that was evicted is %d\n", lru_index);
             if (lru_index != ERROR) // If the lru index was retrieved correctly
             {
                 if (all_tags[lru_index])    // Delete the lru
@@ -219,6 +218,8 @@ void set::update_lru(int entry_index, int verbose)     // Index is this context 
     // Retain old lru because we need to decrement the entries that
     // are more recent than the one we replace. Only used if set is full
     int old_lru = all_tags[entry_index]->get_lru();
+    if (verbose == 2)
+        printf("Old lru is %d", old_lru);
     for (int k = 0; k < associativity; ++k)
     {
         if (k == entry_index)   // Set the new entry to the MRU

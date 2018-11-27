@@ -250,8 +250,6 @@ void set::update_lru(int entry_index, int verbose)     // Index is this context 
     // Retain old lru because we need to decrement the entries that
     // are more recent than the one we replace. Only used if set is full
     int old_lru = all_tags[entry_index]->get_lru();
-    if (verbose == 2)
-        printf("Old lru is %d", old_lru);
     for (int k = 0; k < associativity; ++k)
     {
         if (k == entry_index)   // Set the new entry to the MRU

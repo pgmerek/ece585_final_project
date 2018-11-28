@@ -81,11 +81,9 @@ int cache::invalidate_entry(entry to_invalidate, cache_messages & messages, int 
                 case HIT:
                     sprintf(buffer, "%s%x", WRITE_TO_L2, to_invalidate.get_raw_address());
                     messages.add_message(buffer);
-                    ++hits;
                     result = 1;
                     break;
                 case MISS:
-                    ++misses;
                     result = 1;
                     break;
                 case DO_NOTHING:

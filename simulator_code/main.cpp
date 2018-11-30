@@ -184,17 +184,17 @@ int main(int argc, char * argv[])
             case 9: // Print contents and state of the cache
                 if (verbose == 2)
                     printf("Print contents request.=======\n");
-                printf("\n==================== Summary Statistics =================\n");
-                printf("--------- Data Cache ---------\n");
-                data.print_statistics();
-                printf("\n--------- Instruction Cache ---------\n");
-                instruction.print_statistics();
                 printf("\n======================== Data Cache Contents =======================\n");
                 printf("\nKey: LRU = 0 and MRU = 7\n");
                 data.print_contents();
                 printf("\n==================== Instruction Cache Contents ====================\n");
                 printf("\nKey: LRU = 0 and MRU = 3\n");
                 instruction.print_contents();
+                printf("\n==================== Summary Statistics =================\n");
+                printf("--------- Data Cache ---------\n");
+                data.print_statistics();
+                printf("\n--------- Instruction Cache ---------\n");
+                instruction.print_statistics();
                 if (verbose)
                 {
                     printf("\n========================== Messages to L2 ==========================\n");
